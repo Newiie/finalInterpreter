@@ -32,7 +32,8 @@ const KEYWORDS: Record<string, TokenType> = {
     CHAR: TokenType.CharacterType,
     BOOL: TokenType.BoolType,
     STRING: TokenType.StringType,
-    BEGIN: TokenType.BEGIN
+    BEGIN: TokenType.BEGIN,
+    END: TokenType.EOF
   };
 
 function token(value = "", type: TokenType): Token {
@@ -127,6 +128,6 @@ export function tokenize(srouceCode: string): Token[] {
         }
       }
 
-      tokens.push({ type: TokenType.EOF, value: "EndOfFile" });
+      // tokens.push({ type: TokenType.EOF, value: "EndOfFile" });
     return tokens
 }

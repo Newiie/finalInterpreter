@@ -29,11 +29,19 @@ export interface BinaryExpr extends Expr {
 
 export interface Identifier extends Expr {
     kind: "Identifier"
-    symbol: string
+    value: string
 }
 
 export interface NumericLiteral extends Expr {
     kind: "NumericLiteral"
     value: number
 }
+
+export interface VarDeclaration extends Stmt {
+    kind: "VarDeclaration";
+    // constant: boolean;
+    
+    identifier: string;
+    value?: Expr;
+  }
 

@@ -1,5 +1,4 @@
 BEGIN
-INT
-CHAR
-4
-a
+    INT a = 4
+    INT v = 5
+END

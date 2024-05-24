@@ -1,7 +1,7 @@
 
 import fs from 'fs';
-import { tokenize } from './lexer';
-// import Parser from './frontend/parser'
+import { tokenize } from './frontend/lexer';
+import Parser from './frontend/parser'
 // import { evaluate } from "./runtime/interpreter.ts";
 // import Environment from "./runtime/environment.ts";
 // import { MK_BOOL, MK_NULL, MK_NUMBER } from "./runtime/values.ts";
@@ -13,8 +13,8 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     }
 
     const tokenized = tokenize(data)
-    console.log(tokenized)
-    // const parser = new Parser()
+    // console.log(tokenized)
+    const parser = new Parser()
     // const env = new Environment();
 
     // Create Default Global Enviornment
@@ -28,8 +28,8 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     // console.log(env.lookupVar("false"))
     // console.log(env.lookupVar("null"))
 
-    // const ast = parser.produceAST(data)
-    // console.log("AST ", ast)
+    const ast = parser.produceAST(data)
+    console.log("AST ", ast)
     // const result = evaluate(ast, env);
     // console.log(result);
     // for (const token of tokenized) {
