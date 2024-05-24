@@ -53,8 +53,9 @@ export default class Parser {
     };
     this.expect(TokenType.BEGIN, "The code must start with begin")
     // Parse until end of file
-    console.log(" TOKENS ", this.tokens)
+    // console.log(" TOKENS ", this.tokens)
     while (this.not_eof()) {
+      // if (this.at().type == TokenType.NextLine) this.eat();
       program.body.push(this.parse_stmt());
     }
 
@@ -64,12 +65,23 @@ export default class Parser {
   private parse_stmt(): any {
     // skip to parse_expr
     console.log(" TYPE ", this.at())
-    return this.parse_expr();
+    switch (this.at().type) {
+      case TokenType.IntegerType:
+      case TokenType.CharacterType:
+      case TokenType.Identifier:
+        return this.parse_var_declaration();
+      case TokenType.NextLine:
+        console.log("WHAT IS EATEN: ", this.eat())
+        return
+      default:
+        return this.parse_expr();
+    }
   }
 
   private parse_expr(): Expr {
-    return this.parse_primary_expr();
+    return this.parse_additive_expr();
   }
+
 
   private parse_primary_expr(): any {
     const tk = this.at().type
@@ -84,6 +96,16 @@ export default class Parser {
             return;
         case TokenType.IntegerType:
           return this.parse_var_declaration();
+
+        case TokenType.OpenParen: {
+          this.eat(); // eat the opening paren
+          const value = this.parse_expr();
+          this.expect(
+            TokenType.CloseParen,
+            "Unexpected token found inside parenthesised expression. Expected closing parenthesis.",
+          ); // closing paren
+          return value;
+        }
         default:
             console.error("Unexpected token found during parsing! ", this.at())
             process.exit(1)
@@ -136,4 +158,39 @@ export default class Parser {
     return declaration;
   }
       
+  private parse_additive_expr(): Expr {
+    let left = this.parse_multiplicitave_expr();
+
+    while (this.at().value == "+" || this.at().value == "-") {
+      const operator = this.eat().value;
+      const right = this.parse_multiplicitave_expr();
+      left = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      } as BinaryExpr;
+    }
+
+    return left;
+  }
+
+  private parse_multiplicitave_expr(): Expr {
+    let left = this.parse_primary_expr();
+
+    while (
+      this.at().value == "/" || this.at().value == "*" || this.at().value == "%"
+    ) {
+      const operator = this.eat().value;
+      const right = this.parse_primary_expr();
+      left = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      } as BinaryExpr;
+    }
+
+    return left;
+  }
 }
