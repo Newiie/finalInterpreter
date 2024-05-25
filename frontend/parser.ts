@@ -1,10 +1,11 @@
-import { AssignmentExpr, NumericLiteral } from "./ast.ts";
+import { AssignmentExpr, Display, NewLine, NumericLiteral } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
     Identifier,
     Program,
     Stmt,
+    StringLiteral,
     VarDeclaration
   } from "./ast.ts";
 
@@ -105,6 +106,8 @@ export default class Parser {
             return;
         case TokenType.IntegerType:
           return this.parse_var_declaration();
+        case TokenType.DISPLAY:
+          return this.parse_display();
 
         case TokenType.OpenParen: {
           this.eat(); // eat the opening paren
@@ -120,6 +123,27 @@ export default class Parser {
             process.exit(1)
     }
     
+  }
+
+  parse_display(): any {
+    this.expect(TokenType.DISPLAY, "This expects DISPLAY KEYWORD")
+    let left: Expr[] = []
+    while (true) {
+      console.log("THISSS ", this.at().type)
+      
+      if (this.at().type == TokenType.Identifier)
+        left.push({ kind: "Identifier", symbol: this.eat().value} as Identifier)
+      else if (this.at().type == TokenType.StringType)
+        left.push({ kind: "StringLiteral", value: this.eat().value} as StringLiteral)
+      else if (this.at().type == TokenType.NewLine)
+        left.push({ kind: "NewLine", value: this.eat().value} as NewLine)
+      if (this.at().type == TokenType.NextLine) {
+        break;
+      }
+      this.expect(TokenType.Concatenation, "Display expects concatatination symbol")
+    }-
+    console.log("DISPLAY TOKENS", left)
+    return {kind: "Display", value: left} as Display
   }
 
   // LET IDENT;

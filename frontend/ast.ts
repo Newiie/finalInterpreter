@@ -1,19 +1,26 @@
+import { Token } from "./lexer";
+
 export type NodeType =
   // STATEMENTS
   | "Program"
   | "VarDeclaration"
   | "NullLiteral"
   // EXPRESSIONS
+  | "Display"
   | "IntegerLiteral"
   | "AssignmentExpr"
   | "NumericLiteral"
   | "CharacterLiteral"
+  | "StringLiteral"
   | "Identifier"
-  | "BinaryExpr";
+  | "BinaryExpr"
+  
+//   SPECIAL CHARACTER
+  | "NewLine"
+  ;
 
 export interface Stmt {
     kind: NodeType
-
 }
 
 export interface Program extends Stmt {
@@ -46,9 +53,24 @@ export interface NumericLiteral extends Expr {
     value: number
 }
 
+export interface NewLine extends Expr {
+    kind: "NewLine"
+    value: "\n"
+}
+
+export interface StringLiteral extends Expr {
+    kind: "StringLiteral"
+    value: string
+}
+
+export interface Display extends Expr {
+    kind: "Display"
+    value: Array<Expr>
+}
+
 export interface CharacterLiteral extends Expr {
     kind: "CharacterLiteral"
-    value: number
+    value: string
 }
 
 export interface VarDeclaration extends Stmt {

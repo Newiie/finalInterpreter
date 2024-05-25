@@ -12,12 +12,14 @@ export enum TokenType {
     // RESERVED
     BEGIN,
     END,
-
+    DISPLAY,
     // SPECIAL CHARCTERS
     NextLine,
     OpenParen, CloseParen,
     BinaryOperator,
     SemiColon,
+    Concatenation,
+    NewLine,
     EOF,
     Let,
 }
@@ -33,7 +35,8 @@ export const KEYWORDS: Record<string, TokenType> = {
     BOOL: TokenType.BoolType,
     STRING: TokenType.StringType,
     BEGIN: TokenType.BEGIN,
-    END: TokenType.EOF
+    END: TokenType.EOF,
+    DISPLAY: TokenType.DISPLAY
   };
 
 function token(value = "", type: TokenType): Token {
@@ -73,7 +76,25 @@ export function tokenize(srouceCode: string): Token[] {
           tokens.push(token(src.shift(), TokenType.OpenParen));
         } else if (src[0] == ")") {
           tokens.push(token(src.shift(), TokenType.CloseParen));
-        } // HANDLE BINARY OPERATORS
+        } else if (src[0] == "&") {
+          tokens.push(token(src.shift(), TokenType.Concatenation));
+        } else if (src[0] == "$") {
+          tokens.push(token(src.shift(), TokenType.NewLine));
+        }else if (src[0] == "\"") {
+          let ident = "";
+          console.log("WENT IN HERE")
+          src.shift()
+          while (src.length > 0 && (isalpha(src[0]) || src[0] == " ")) {
+            ident += src.shift();
+          }
+          if (src[0] != "\"") {
+            console.error("Expected closing \"")
+            process.exit(1)
+          }
+          src.shift();
+          console.log("IDENT ", ident)
+          tokens.push(token(ident, TokenType.StringType))
+        }// HANDLE BINARY OPERATORS
         else if (
           src[0] == "+" || src[0] == "-" || src[0] == "*" || src[0] == "/" ||
           src[0] == "%"
