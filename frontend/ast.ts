@@ -17,6 +17,7 @@ export type NodeType =
   
 //   SPECIAL CHARACTER
   | "NewLine"
+  | "CommentExpr"
   ;
 
 export interface Stmt {
@@ -56,6 +57,11 @@ export interface NumericLiteral extends Expr {
 export interface NewLine extends Expr {
     kind: "NewLine"
     value: "\n"
+}
+
+export interface CommentExpr extends Expr {
+    kind: "CommentExpr"
+    value: string
 }
 
 export interface StringLiteral extends Expr {

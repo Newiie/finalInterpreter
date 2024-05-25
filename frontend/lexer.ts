@@ -15,6 +15,7 @@ export enum TokenType {
     DISPLAY,
     // SPECIAL CHARCTERS
     NextLine,
+    Comment,
     OpenParen, CloseParen,
     BinaryOperator,
     SemiColon,
@@ -80,11 +81,13 @@ export function tokenize(srouceCode: string): Token[] {
           tokens.push(token(src.shift(), TokenType.Concatenation));
         } else if (src[0] == "$") {
           tokens.push(token(src.shift(), TokenType.NewLine));
-        }else if (src[0] == "\"") {
+        } else if (src[0] == "#") {
+          tokens.push(token(src.shift(), TokenType.Comment));
+        } else if (src[0] == "\"") {
           let ident = "";
           console.log("WENT IN HERE")
           src.shift()
-          while (src.length > 0 && (isalpha(src[0]) || src[0] == " ")) {
+          while (src.length > 0 && src[0] != "\"") {
             ident += src.shift();
           }
           if (src[0] != "\"") {

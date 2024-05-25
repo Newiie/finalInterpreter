@@ -1,4 +1,4 @@
-import { AssignmentExpr, Display, NewLine, NumericLiteral } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, NumericLiteral } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -101,6 +101,8 @@ export default class Parser {
             return { kind: "Identifier", symbol: this.eat().value} as Identifier;
         case TokenType.Number:
             return { kind: "NumericLiteral", value: parseFloat(this.eat().value)} as NumericLiteral;
+        case TokenType.Comment:
+          return this.parse_comment()
         case TokenType.NextLine:
             this.eat()
             return;
@@ -123,6 +125,12 @@ export default class Parser {
             process.exit(1)
     }
     
+  }
+  parse_comment(): any {
+    while (this.at().type != TokenType.NextLine) {
+      console.log("AT, ", this.at())
+      this.eat()
+    }
   }
 
   parse_display(): any {

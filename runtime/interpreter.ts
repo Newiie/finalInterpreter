@@ -8,6 +8,7 @@ import {
 //   IntegerLiteral,
   Program,
   Stmt,
+  StringLiteral,
   VarDeclaration,
 } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
@@ -49,10 +50,13 @@ function eval_display(Node: Display, env: Environment): RuntimeVal {
   let outputString = "";
   for (const stmt of Node.value) {
     if (stmt.kind === "Identifier") {
-      const value = env.lookupVar(stmt.symbol).value;
+      const newStmt = stmt as Identifier
+      const vara = (env.lookupVar(newStmt.symbol)) as NumberVal ;
+      const value = vara.value
       outputString += value !== undefined ? value : "undefined";
     } else if (stmt.kind === "StringLiteral") {
-      outputString += stmt.value;
+      const newStmt = stmt as StringLiteral
+      outputString += newStmt.value;
     } else if (stmt.kind === "NewLine") {
       outputString += "\n";
     } else {
