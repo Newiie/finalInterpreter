@@ -27,7 +27,7 @@ export interface Token {
     type: TokenType
 }
 
-const KEYWORDS: Record<string, TokenType> = {
+export const KEYWORDS: Record<string, TokenType> = {
     INT: TokenType.IntegerType,
     CHAR: TokenType.CharacterType,
     BOOL: TokenType.BoolType,

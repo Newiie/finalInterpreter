@@ -1,3 +1,5 @@
 BEGIN
-    5-4 * ( 10 + 3)
+    INT v = 45 / 3
+    INT z = 5
+    v = z = 3
 END

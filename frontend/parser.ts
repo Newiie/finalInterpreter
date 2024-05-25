@@ -1,4 +1,4 @@
-import { NumericLiteral } from "./ast.ts";
+import { AssignmentExpr, NumericLiteral } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -8,7 +8,7 @@ import {
     VarDeclaration
   } from "./ast.ts";
 
-  import { Token, tokenize, TokenType } from "./lexer.ts";
+  import { Token, tokenize, TokenType, KEYWORDS } from "./lexer.ts";
 
 export default class Parser {
   private tokens: Token[] = [];
@@ -53,7 +53,7 @@ export default class Parser {
     };
     this.expect(TokenType.BEGIN, "The code must start with begin")
     // Parse until end of file
-    // console.log(" TOKENS ", this.tokens)
+    console.log(" TOKENS ", this.tokens)
     while (this.not_eof()) {
       // if (this.at().type == TokenType.NextLine) this.eat();
       program.body.push(this.parse_stmt());
@@ -64,14 +64,12 @@ export default class Parser {
 
   private parse_stmt(): any {
     // skip to parse_expr
-    console.log(" TYPE ", this.at())
     switch (this.at().type) {
       case TokenType.IntegerType:
       case TokenType.CharacterType:
-      case TokenType.Identifier:
         return this.parse_var_declaration();
       case TokenType.NextLine:
-        console.log("WHAT IS EATEN: ", this.eat())
+        this.eat();
         return
       default:
         return this.parse_expr();
@@ -79,16 +77,27 @@ export default class Parser {
   }
 
   private parse_expr(): Expr {
-    return this.parse_additive_expr();
+    return this.parse_assignment_expr();
   }
 
+  parse_assignment_expr(): Expr {
+    const left = this.parse_additive_expr();
+
+    if (this.at().type == TokenType.Equals) {
+      this.eat();
+      const value = this.parse_assignment_expr();
+      return {value, assignee: left, kind: "AssignmentExpr"} as AssignmentExpr
+    }
+
+    return left;
+  }
 
   private parse_primary_expr(): any {
     const tk = this.at().type
 
     switch(tk) {
         case TokenType.Identifier:
-            return { kind: "Identifier", value: this.eat().value} as Identifier;
+            return { kind: "Identifier", symbol: this.eat().value} as Identifier;
         case TokenType.Number:
             return { kind: "NumericLiteral", value: parseFloat(this.eat().value)} as NumericLiteral;
         case TokenType.NextLine:
@@ -120,16 +129,17 @@ export default class Parser {
     // this.eat()
     const DataType = this.eat();
     console.log("DATA TYPE ", DataType)
+    if (!KEYWORDS[DataType.value]) {
+      console.error("Unkown data type ", DataType.value)
+      process.exit(1)
+    }
     const identifier = this.expect(
       TokenType.Identifier,
-      "Expected identifier name following let | const keywords.",
+      "Expected identifier name following DATA TYPES keywords.",
     ).value;
 
     if (this.at().type == TokenType.NextLine && this.at().type == TokenType.EOF) {
       this.eat(); // expect semicolon
-      // if (isConstant) {
-      //   throw "Must assigne value to constant expression. No value provided.";
-      // }
 
       return {
         kind: "VarDeclaration",
