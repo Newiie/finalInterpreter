@@ -22,7 +22,7 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     const env = new Environment();
 
     // Create Default Global Enviornment
-    env.declareVar("x", MK_NUMBER(100));
+    // env.declareVar("x", MK_NUMBER(100));
     env.declareVar("true", MK_BOOL(true));
     env.declareVar("false", MK_BOOL(false));
     // env.declareVar("null", MK_NULL(), false);
@@ -33,7 +33,7 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     // console.log(env.lookupVar("null"))
 
     const ast = parser.produceAST(data)
-    // console.log("AST ", ast)
+    console.log("AST ", ast)
     let filteredArray = ast.body.filter(element => element !== undefined);
     ast.body = filteredArray
     console.log("FILTERED ", filteredArray)

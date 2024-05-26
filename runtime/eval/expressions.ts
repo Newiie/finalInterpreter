@@ -23,7 +23,7 @@ function eval_numeric_binary_expr(
   } else {
     result = lhs.value % rhs.value;
   }
-  if (!decimals) return { value: parseInt(result.toString()), type: "number" };
+  // if (!decimals) return { value: parseInt(result.toString()), type: "number" };
   return { value: result, type: "number" };
 }
 
@@ -73,7 +73,7 @@ export function eval_assignment(node: AssignmentExpr, env: Environment): Runtime
         throw `Invalid assignment expr ${JSON.stringify(node.assignee)}`
     }
 
-    if ((node.assignee as Identifier).dataType != node.value.kind) throw `Data Type mismatch ${(node.assignee as Identifier).dataType} not equal to ${node.value.kind}`
+    if (((node.assignee as Identifier).dataType != node.value.kind) && node.value.kind != "AssignmentExpr") throw `Data Type mismatch ${(node.assignee as Identifier).dataType} not equal to ${node.value.kind}`
 
     const varname = (node.assignee as Identifier).symbol
     return env.assignVar(varname, evaluate(node.value, env))

@@ -1,5 +1,8 @@
-BEGIN
-    FLOAT  v = 1.5
-    v = 2
-    DISPLAY v
-END
+BEGIN 
+    INT x
+    INT z 
+    
+    x=z=6
+    # this is a comment
+    DISPLAY x
+END 
