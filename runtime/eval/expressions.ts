@@ -1,13 +1,14 @@
 import { AssignmentExpr, BinaryExpr, Identifier } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { MK_NULL, NumberVal, RuntimeVal } from "../values.ts";
+import { FloatVal, MK_NULL, NumberVal, RuntimeVal } from "../values.ts";
 
 function eval_numeric_binary_expr(
   lhs: NumberVal,
   rhs: NumberVal,
   operator: string,
-): NumberVal {
+  decimals: boolean
+): NumberVal  {
   let result: number;
   if (operator == "+") {
     result = lhs.value + rhs.value;
@@ -17,11 +18,12 @@ function eval_numeric_binary_expr(
     result = lhs.value * rhs.value;
   } else if (operator == "/") {
     // TODO: Division by zero checks
+    if (rhs.value == 0) throw `Math Error: cant divide by 0`
     result = lhs.value / rhs.value;
   } else {
     result = lhs.value % rhs.value;
   }
-
+  if (!decimals) return { value: parseInt(result.toString()), type: "number" };
   return { value: result, type: "number" };
 }
 
@@ -42,6 +44,14 @@ export function eval_binary_expr(
       lhs as NumberVal,
       rhs as NumberVal,
       binop.operator,
+      false,
+    );
+  } else if (lhs.type == "float" || rhs.type == "float") {
+    return eval_numeric_binary_expr(
+      lhs as NumberVal,
+      rhs as NumberVal,
+      binop.operator,
+      true,
     );
   }
 
@@ -62,6 +72,8 @@ export function eval_assignment(node: AssignmentExpr, env: Environment): Runtime
     if (node.assignee.kind != "Identifier") {
         throw `Invalid assignment expr ${JSON.stringify(node.assignee)}`
     }
+
+    if ((node.assignee as Identifier).dataType != node.value.kind) throw `Data Type mismatch ${(node.assignee as Identifier).dataType} not equal to ${node.value.kind}`
 
     const varname = (node.assignee as Identifier).symbol
     return env.assignVar(varname, evaluate(node.value, env))

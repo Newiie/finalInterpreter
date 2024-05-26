@@ -1,5 +1,5 @@
 export enum TokenType {
-    Number,
+    Integer,
     Identifier,
     Equals,
 
@@ -8,7 +8,7 @@ export enum TokenType {
     CharacterType,
     BoolType,
     StringType,
-
+    FloatType,
     // RESERVED
     BEGIN,
     END,
@@ -27,11 +27,13 @@ export enum TokenType {
 
 export interface Token {
     value: string,
-    type: TokenType
+    type: TokenType,
+    dataType: string
 }
 
 export const KEYWORDS: Record<string, TokenType> = {
     INT: TokenType.IntegerType,
+    FLOAT: TokenType.FloatType,
     CHAR: TokenType.CharacterType,
     BOOL: TokenType.BoolType,
     STRING: TokenType.StringType,
@@ -40,8 +42,8 @@ export const KEYWORDS: Record<string, TokenType> = {
     DISPLAY: TokenType.DISPLAY
   };
 
-function token(value = "", type: TokenType): Token {
-    return {value, type};
+function token(value = "", type: TokenType, dataType = ""): Token {
+    return {value, type, dataType};
 }
 
 /**
@@ -55,9 +57,7 @@ function isskippable(str: string) {
  Return whether the character is a valid integer -> [0-9]
 */
 function isint(str: string) {
-const c = str.charCodeAt(0);
-const bounds = ["0".charCodeAt(0), "9".charCodeAt(0)];
-return c >= bounds[0] && c <= bounds[1];
+  return /^-?\d+(\.\d+)?$/.test(str);
 }
 
 /**
@@ -67,7 +67,7 @@ function isalpha(src: string) {
     return src.toUpperCase() != src.toLowerCase();
 }
 
-export function tokenize(srouceCode: string): Token[] {
+export function tokenize(srouceCode: string): any[] {
     const tokens = new Array<Token>();
     const src = srouceCode.split("");
 
@@ -83,9 +83,12 @@ export function tokenize(srouceCode: string): Token[] {
           tokens.push(token(src.shift(), TokenType.NewLine));
         } else if (src[0] == "#") {
           tokens.push(token(src.shift(), TokenType.Comment));
+        } else if (src[0] == "\'") {
+          src.shift()
+          tokens.push(token(src.shift(), TokenType.CharacterType));
+          src.shift()
         } else if (src[0] == "\"") {
           let ident = "";
-          console.log("WENT IN HERE")
           src.shift()
           while (src.length > 0 && src[0] != "\"") {
             ident += src.shift();
@@ -113,12 +116,31 @@ export function tokenize(srouceCode: string): Token[] {
           // Handle numeric literals -> Integers
           if (isint(src[0])) {
             let num = "";
+            let isFloat = false;
             while (src.length > 0 && isint(src[0])) {
               num += src.shift();
             }
-    
+
+            // Check for decimal point and fractional part
+            if (src.length > 0 && src[0] === ".") {
+              isFloat = true;
+              num += src.shift(); // Include the decimal point
+
+              // Process fractional part
+              while (src.length > 0 && isint(src[0])) {
+                num += src.shift();
+              }
+            }
+            // Determine the type of the numeric literal
+            const tokenDataType = tokens[tokens.length - 3]?.value;
+
+            if (isFloat || tokenDataType === "FLOAT") {
+              tokens.push(token(num, TokenType.FloatType));
+            } else {
+              tokens.push(token(num, TokenType.Integer));
+            }
             // append new numeric token.
-            tokens.push(token(num, TokenType.Number));
+            
           } // Handle Identifier & Keyword Tokens.
           else if (isalpha(src[0])) {
             let ident = "";
@@ -134,7 +156,19 @@ export function tokenize(srouceCode: string): Token[] {
               tokens.push(token(ident, reserved));
             } else {
               // Unreconized name must mean user defined symbol.
-              tokens.push(token(ident, TokenType.Identifier));
+              // console.log("LAST TOKEN ", tokens[tokens.length - 3])
+            const token_data_type = tokens[tokens.length - 3]
+              switch(token_data_type.value) {
+                case "FLOAT":
+                  tokens.push(token(ident, TokenType.Identifier, "FloatLiteral"));
+                  break;
+                case "CHAR":
+                  tokens.push(token(ident, TokenType.Identifier, "CharacterLiteral"));
+                  break;
+                default:
+                  tokens.push(token(ident, TokenType.Identifier, "IntegerLiteral"));              
+              }
+              // tokens.push(token(ident, TokenType.Identifier, dataType));
             }
           } else if (isskippable(src[0])) {
             // Skip uneeded chars.

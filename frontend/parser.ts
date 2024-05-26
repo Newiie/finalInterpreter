@@ -1,4 +1,4 @@
-import { AssignmentExpr, CommentExpr, Display, NewLine, NumericLiteral } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -54,7 +54,7 @@ export default class Parser {
     };
     this.expect(TokenType.BEGIN, "The code must start with begin")
     // Parse until end of file
-    console.log(" TOKENS ", this.tokens)
+    // console.log(" TOKENS ", this.tokens)
     while (this.not_eof()) {
       // if (this.at().type == TokenType.NextLine) this.eat();
       program.body.push(this.parse_stmt());
@@ -68,6 +68,7 @@ export default class Parser {
     switch (this.at().type) {
       case TokenType.IntegerType:
       case TokenType.CharacterType:
+      case TokenType.FloatType:
         return this.parse_var_declaration();
       case TokenType.NextLine:
         this.eat();
@@ -83,11 +84,11 @@ export default class Parser {
 
   parse_assignment_expr(): Expr {
     const left = this.parse_additive_expr();
-
+    
     if (this.at().type == TokenType.Equals) {
       this.eat();
       const value = this.parse_assignment_expr();
-      return {value, assignee: left, kind: "AssignmentExpr"} as AssignmentExpr
+      return {value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr
     }
 
     return left;
@@ -95,12 +96,17 @@ export default class Parser {
 
   private parse_primary_expr(): any {
     const tk = this.at().type
-
+    const dataType = this.at().dataType
+    console.log("TK ", this.at())
     switch(tk) {
         case TokenType.Identifier:
-            return { kind: "Identifier", symbol: this.eat().value} as Identifier;
-        case TokenType.Number:
-            return { kind: "NumericLiteral", value: parseFloat(this.eat().value)} as NumericLiteral;
+            return { kind: "Identifier", symbol: this.eat().value, dataType} as Identifier;
+        case TokenType.Integer:
+            return { kind: "IntegerLiteral", value: parseInt(this.eat().value)} as IntegerLiteral;
+        case TokenType.FloatType:
+          return { kind: "FloatLiteral", value: parseFloat(this.eat().value)} as FloatLiteral;
+        case TokenType.CharacterType:
+          return { kind: "CharacterLiteral", value: this.eat().value} as CharacterLiteral;
         case TokenType.Comment:
           return this.parse_comment()
         case TokenType.NextLine:
@@ -137,8 +143,6 @@ export default class Parser {
     this.expect(TokenType.DISPLAY, "This expects DISPLAY KEYWORD")
     let left: Expr[] = []
     while (true) {
-      console.log("THISSS ", this.at().type)
-      
       if (this.at().type == TokenType.Identifier)
         left.push({ kind: "Identifier", symbol: this.eat().value} as Identifier)
       else if (this.at().type == TokenType.StringType)
@@ -149,8 +153,8 @@ export default class Parser {
         break;
       }
       this.expect(TokenType.Concatenation, "Display expects concatatination symbol")
-    }-
-    console.log("DISPLAY TOKENS", left)
+    }
+    // console.log("DISPLAY TOKENS", left)
     return {kind: "Display", value: left} as Display
   }
 
@@ -159,10 +163,23 @@ export default class Parser {
   parse_var_declaration(): Stmt {
     // const isConstant = this.eat().type == TokenType.Const;
     // this.eat()
-    const DataType = this.eat();
+    const DataTypeVariable = this.eat();
+    // console.log("DATA TYPE VAR ", DataTypeVariable)
+    let DataType = ""
+    switch(DataTypeVariable.value) {
+      case "CHAR":
+        DataType = "CharacterLiteral"
+        break
+      case "FLOAT":
+        DataType = "FloatLiteral"
+        break
+      case "INT":
+        DataType = "IntegerLiteral"
+        break
+    }
     console.log("DATA TYPE ", DataType)
-    if (!KEYWORDS[DataType.value]) {
-      console.error("Unkown data type ", DataType.value)
+    if (!KEYWORDS[DataTypeVariable.value]) {
+      console.error("Unkown data type ", DataTypeVariable.value)
       process.exit(1)
     }
     const identifier = this.expect(
@@ -170,13 +187,12 @@ export default class Parser {
       "Expected identifier name following DATA TYPES keywords.",
     ).value;
 
-    if (this.at().type == TokenType.NextLine && this.at().type == TokenType.EOF) {
+    if (this.at().type == TokenType.NextLine || this.at().type == TokenType.EOF) {
       this.eat(); // expect semicolon
 
       return {
         kind: "VarDeclaration",
         identifier,
-        constant: false,
       } as VarDeclaration;
     }
 
@@ -188,8 +204,8 @@ export default class Parser {
     const declaration = {
       kind: "VarDeclaration",
       value: this.parse_expr(),
+      dataType: DataType,
       identifier,
-      // constant: isConstant,
     } as VarDeclaration;
 
     this.expect(

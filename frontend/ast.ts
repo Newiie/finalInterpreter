@@ -5,13 +5,15 @@ export type NodeType =
   | "Program"
   | "VarDeclaration"
   | "NullLiteral"
+
   // EXPRESSIONS
-  | "Display"
   | "IntegerLiteral"
-  | "AssignmentExpr"
-  | "NumericLiteral"
+  | "FloatLiteral"
   | "CharacterLiteral"
   | "StringLiteral"
+  
+  | "Display"
+  | "AssignmentExpr"
   | "Identifier"
   | "BinaryExpr"
   
@@ -47,10 +49,16 @@ export interface BinaryExpr extends Expr {
 export interface Identifier extends Expr {
     kind: "Identifier";
     symbol: string;
+    dataType: string
   }
 
-export interface NumericLiteral extends Expr {
-    kind: "NumericLiteral"
+export interface IntegerLiteral extends Expr {
+    kind: "IntegerLiteral"
+    value: number,
+}
+
+export interface FloatLiteral extends Expr {
+    kind: "FloatLiteral"
     value: number
 }
 
@@ -82,6 +90,7 @@ export interface CharacterLiteral extends Expr {
 export interface VarDeclaration extends Stmt {
     kind: "VarDeclaration";
     identifier: string;
+    dataType: string
     value?: Expr;
   }
 

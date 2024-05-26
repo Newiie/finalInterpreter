@@ -1,7 +1,5 @@
 BEGIN
-    INT v = 45 / 3
-    INT z = 5
-    v = z = 3
-    #ASD
-    DISPLAY "MY AGE IS " & v & z & $  & " asdads"
+    FLOAT  v = 1.5
+    v = 2
+    DISPLAY v
 END

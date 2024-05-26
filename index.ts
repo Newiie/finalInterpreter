@@ -36,11 +36,8 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     // console.log("AST ", ast)
     let filteredArray = ast.body.filter(element => element !== undefined);
     ast.body = filteredArray
-    // console.log("FILTERED ", filteredArray)
+    console.log("FILTERED ", filteredArray)
     const result = evaluate(ast, env);
     console.log(result);
-    // for (const token of tokenized) {
-    //     console.log(token)
-    // }
 });
 

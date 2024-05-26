@@ -1,14 +1,15 @@
-import { NumberVal, RuntimeVal, MK_NULL, DisplayVal } from "./values.ts";
+import { NumberVal, RuntimeVal, MK_NULL, DisplayVal, FloatVal, CharVal } from "./values.ts";
 import {
     AssignmentExpr,
   BinaryExpr,
   Display,
   Identifier,
-  NumericLiteral,
-//   IntegerLiteral,
+  IntegerLiteral,
+  FloatLiteral,
   Program,
   Stmt,
   StringLiteral,
+  CharacterLiteral,
   VarDeclaration,
 } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
@@ -16,13 +17,22 @@ import { eval_program, eval_var_declaration } from "./eval/statements.ts";
 import { eval_assignment, eval_binary_expr, eval_identifier } from "./eval/expressions.ts";
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
-//   if (!astNode) return MK_NULL()
   switch (astNode.kind) {
-    case "NumericLiteral":
+    case "IntegerLiteral":
       return {
-        value: ((astNode as NumericLiteral).value),
+        value: ((astNode as IntegerLiteral).value),
         type: "number",
       } as NumberVal;
+      case "FloatLiteral":
+        return {
+          value: ((astNode as FloatLiteral).value),
+          type: "float",
+        } as FloatVal;
+      case "CharacterLiteral":
+        return {
+          value: ((astNode as CharacterLiteral).value),
+          type: "char",
+        } as CharVal;
     case "Identifier":
       return eval_identifier(astNode as Identifier, env);
     case "AssignmentExpr":
