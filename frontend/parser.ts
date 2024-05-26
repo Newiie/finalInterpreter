@@ -1,3 +1,4 @@
+import { MK_NULL } from "../runtime/values.ts";
 import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral } from "./ast.ts";
 import {
     BinaryExpr,
@@ -49,36 +50,39 @@ export default class Parser {
   public produceAST(sourceCode: string): Program {
     this.tokens = tokenize(sourceCode);
     const program: Program = {
-      kind: "Program",
-      body: [],
+        kind: "Program",
+        body: [],
     };
-    this.expect(TokenType.BEGIN, "The code must start with begin")
-    this.expect(TokenType.CODE, "The code must start with begin")
-    // Parse until end of file
-    console.log(" TOKENS ", this.tokens)
+    this.expect(TokenType.BEGIN, "The code must start with BEGIN");
+    this.expect(TokenType.CODE, "The code must start with CODE");
+
     while (this.not_eof()) {
-      // if (this.at().type == TokenType.NextLine) this.eat();
-      program.body.push(this.parse_stmt());
+        const stmt = this.parse_stmt();
+        if (Array.isArray(stmt)) {
+            program.body.push(...stmt); // spread the array into the body
+        } else if (stmt) {
+            program.body.push(stmt);
+        }
     }
 
     return program;
-  }
+}
+
 
   private parse_stmt(): any {
-    // skip to parse_expr
-    const type = this.at().type
     switch (this.at().type) {
-      case TokenType.IntegerType:
-      case TokenType.CharacterType:
-      case TokenType.FloatType:
-        return this.parse_var_declaration();
-      case TokenType.NextLine:
-        this.eat();
-        return
-      default:
-        return this.parse_expr();
+        case TokenType.IntegerType:
+        case TokenType.CharacterType:
+        case TokenType.FloatType:
+            return this.parse_var_declaration(); // returns an array of declarations
+        case TokenType.NextLine:
+            this.eat();
+            return;
+        default:
+            return this.parse_expr();
     }
-  }
+}
+
 
   private parse_expr(): Expr {
     return this.parse_assignment_expr();
@@ -162,61 +166,75 @@ export default class Parser {
 
   // LET IDENT;
   // ( LET | CONST ) IDENT = EXPR;
-  parse_var_declaration(): Stmt {
-    // const isConstant = this.eat().type == TokenType.Const;
-    // this.eat()
+  parse_var_declaration(): VarDeclaration[] {
     const DataTypeVariable = this.eat();
-    // console.log("DATA TYPE VAR ", DataTypeVariable)
-    let DataType = ""
-    switch(DataTypeVariable.value) {
-      case "CHAR":
-        DataType = "CharacterLiteral"
-        break
-      case "FLOAT":
-        DataType = "FloatLiteral"
-        break
-      case "INT":
-        DataType = "IntegerLiteral"
-        break
-    }
-    console.log("DATA TYPE ", DataType)
-    if (!KEYWORDS[DataTypeVariable.value]) {
-      console.error("Unkown data type ", DataTypeVariable.value)
-      process.exit(1)
-    }
-    const identifier = this.expect(
-      TokenType.Identifier,
-      "Expected identifier name following DATA TYPES keywords.",
-    ).value;
-
-    if (this.at().type == TokenType.NextLine || this.at().type == TokenType.EOF || this.at().type == TokenType.Identifier) {
-      this.eat(); // expect semicolon
-
-      return {
-        kind: "VarDeclaration",
-        identifier,
-      } as VarDeclaration;
+    let DataType = "";
+    switch (DataTypeVariable.value) {
+        case "CHAR":
+            DataType = "CharacterLiteral";
+            break;
+        case "FLOAT":
+            DataType = "FloatLiteral";
+            break;
+        case "INT":
+            DataType = "IntegerLiteral";
+            break;
+        default:
+            console.error("Unknown data type ", DataTypeVariable.value);
+            process.exit(1);
     }
 
-    this.expect(
-      TokenType.Equals,
-      "Expected equals token following identifier in var declaration.",
-    );
+    const declarations: VarDeclaration[] = [];
 
-    const declaration = {
-      kind: "VarDeclaration",
-      value: this.parse_expr(),
-      dataType: DataType,
-      identifier,
-    } as VarDeclaration;
+    while (true) {
+        const identifier = this.expect(
+            TokenType.Identifier,
+            "Expected identifier name following DATA TYPES keywords."
+        ).value;
+        let value: Expr
+        switch(DataTypeVariable.value) {
+          case "CHAR":
+            value = { kind: "CharacterLiteral", value: ''} as CharacterLiteral
+            break;
+          case "FLOAT":
+              value = { kind: "FloatLiteral", value: parseFloat("0")} as FloatLiteral
+              break;
+          case "INT":
+              value = { kind: "IntegerLiteral", value: parseInt("0")} as IntegerLiteral
+              break;
+          default:
+              console.error("Unknown data type ", DataTypeVariable.value);
+              process.exit(1);
+        }
+        if (this.at().type == TokenType.Equals) {
+            this.eat(); // consume the equals token
+            value = this.parse_expr();
+        }
 
-    this.expect(
-      TokenType.NextLine,
-      "Variable declaration statment must end with nextline.",
-    );
+        declarations.push({
+            kind: "VarDeclaration",
+            identifier,
+            dataType: DataType,
+            value,
+        });
 
-    return declaration;
-  }
+        if (this.at().type == TokenType.NextLine || this.at().type == TokenType.EOF) {
+            this.eat(); // consume nextline or EOF
+            break;
+        }
+
+        if (this.at().type == TokenType.COMMA) {
+            this.eat(); // consume comma
+            continue; // proceed to the next declaration
+        } else {
+            console.error("Expected comma or end of line after variable declaration");
+            process.exit(1);
+        }
+    }
+
+    return declarations;
+}
+
       
   private parse_additive_expr(): Expr {
     let left = this.parse_multiplicitave_expr();

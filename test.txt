@@ -1,4 +1,4 @@
 BEGIN CODE
-    INT _x123= -6 + 5
-    DISPLAY: _x123
+    INT x, z = 6
+    DISPLAY: x & z
 END CODE

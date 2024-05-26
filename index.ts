@@ -33,11 +33,12 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     // console.log(env.lookupVar("null"))
 
     const ast = parser.produceAST(data)
-    console.log("AST ", ast)
+    // console.log("AST ", ast)
     let filteredArray = ast.body.filter(element => element !== undefined);
     ast.body = filteredArray
     console.log("FILTERED ", filteredArray)
     const result = evaluate(ast, env);
+    console.log("NO ERROR!")
     console.log(result);
 });
 

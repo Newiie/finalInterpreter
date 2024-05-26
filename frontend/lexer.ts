@@ -24,6 +24,7 @@ export enum TokenType {
   EOF,
   CODE,
   COLON,
+  COMMA,
   Let,
 }
 
@@ -164,6 +165,7 @@ export function tokenize(srouceCode: string): any[] {
                   const reserved = KEYWORDS[ident];
                   // If value is not undefined then the identifier is
                   // recognized keyword
+                  
                   if (typeof reserved == "number") {
                       if (ident == "DISPLAY" && src.shift() != ":") {
                           throw `DISPLAY command not found do you mean DISPLAY: ?`;
@@ -172,8 +174,9 @@ export function tokenize(srouceCode: string): any[] {
                       break;
                   } else {
                       // Unrecognized name must mean user defined symbol.
+                      if (ident == "") break;
                       // console.log("LAST TOKEN ", tokens[tokens.length - 3])
-                      while (src.length > 0 && (src[0] != "=" && src[0] != "\n" && src[0] != "\r" && src[0] != " ")) {
+                      while (src.length > 0 && (src[0] != "=" && src[0] != "\n" && src[0] != "\r" && src[0] != " " && src[0] != ",")) {
                           ident += src.shift();
                       }
                       switch (token_data_type.value) {
@@ -186,11 +189,13 @@ export function tokenize(srouceCode: string): any[] {
                           default:
                               tokens.push(token(ident, TokenType.Identifier, "IntegerLiteral"));
                       }
-                      while (src[0] == " ") {
-                          src.shift();
+                      while (src[0] === " ") {
+                          console.log("WENT IN HERE", src.shift())
+          
                       }
+                      console.log("NEW ONE ", src[0])
                       if (src[0] == ",") {
-                          src.shift();
+                        tokens.push(token(src.shift(), TokenType.COMMA));
                       } else break;
                   }
 
