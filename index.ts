@@ -14,7 +14,7 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
 
     const tokenized = tokenize(data)
     // console.log(tokenized)
-    if (tokenized[tokenized.length - 1].type != TokenType.EOF) {
+    if (tokenized[tokenized.length - 2].type != TokenType.EOF) {
       console.error("All codes are placed inside BEGIN CODE and END CODE!")
       return;
     }

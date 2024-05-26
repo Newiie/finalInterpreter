@@ -53,8 +53,9 @@ export default class Parser {
       body: [],
     };
     this.expect(TokenType.BEGIN, "The code must start with begin")
+    this.expect(TokenType.CODE, "The code must start with begin")
     // Parse until end of file
-    // console.log(" TOKENS ", this.tokens)
+    console.log(" TOKENS ", this.tokens)
     while (this.not_eof()) {
       // if (this.at().type == TokenType.NextLine) this.eat();
       program.body.push(this.parse_stmt());
@@ -65,6 +66,7 @@ export default class Parser {
 
   private parse_stmt(): any {
     // skip to parse_expr
+    const type = this.at().type
     switch (this.at().type) {
       case TokenType.IntegerType:
       case TokenType.CharacterType:
@@ -187,7 +189,7 @@ export default class Parser {
       "Expected identifier name following DATA TYPES keywords.",
     ).value;
 
-    if (this.at().type == TokenType.NextLine || this.at().type == TokenType.EOF) {
+    if (this.at().type == TokenType.NextLine || this.at().type == TokenType.EOF || this.at().type == TokenType.Identifier) {
       this.eat(); // expect semicolon
 
       return {

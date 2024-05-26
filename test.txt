@@ -1,8 +1,4 @@
-BEGIN 
-    INT x
-    INT z 
-    
-    x=z=6
-    # this is a comment
-    DISPLAY x
-END 
+BEGIN CODE
+    INT _x123= -6 + 5
+    DISPLAY: _x123
+END CODE
