@@ -16,7 +16,10 @@ export function eval_var_declaration(
   env: Environment,
 ): RuntimeVal {
   // if (declaration.value?.kind == "FloatLiteral" && declaration.dataType == "IntegerLiteral") 
-  if (declaration.value?.kind != declaration.dataType && declaration.value?.kind != "BinaryExpr") throw `Initialzation not applicable DataType mismatch`
+  if (
+    (declaration.value?.kind != declaration.dataType && declaration.value?.kind != "BinaryExpr") &&
+    (declaration.value?.kind != "StringLiteral" && declaration.dataType != "BooleanLiteral")
+  ) throw `Initialzation not applicable DataType mismatch`
   const value = declaration.value
     ? evaluate(declaration.value, env)
     : MK_NULL();

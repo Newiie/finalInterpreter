@@ -11,6 +11,7 @@ export type NodeType =
   | "FloatLiteral"
   | "CharacterLiteral"
   | "StringLiteral"
+  | "BooleanLiteral"
   
   | "Display"
   | "AssignmentExpr"
@@ -74,6 +75,11 @@ export interface CommentExpr extends Expr {
 
 export interface StringLiteral extends Expr {
     kind: "StringLiteral"
+    value: string
+}
+
+export interface BooleanLiteral extends Expr {
+    kind: "BooleanLiteral"
     value: string
 }
 

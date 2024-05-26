@@ -85,8 +85,13 @@ export function tokenize(srouceCode: string): any[] {
           tokens.push(token(src.shift(), TokenType.Concatenation));
       } else if (src[0] == "$") {
           tokens.push(token(src.shift(), TokenType.NewLine));
+      } else if (src[0] == ",") {
+        tokens.push(token(src.shift(), TokenType.COMMA));
       } else if (src[0] == "#") {
           tokens.push(token(src.shift(), TokenType.Comment));
+          while(src.length > 0 && src[0] != "\n") {
+            src.shift()
+          }
       } else if (src[0] == "\'") {
           src.shift();
           tokens.push(token(src.shift(), TokenType.CharacterType));
@@ -102,7 +107,6 @@ export function tokenize(srouceCode: string): any[] {
               process.exit(1);
           }
           src.shift();
-          console.log("IDENT ", ident);
           tokens.push(token(ident, TokenType.StringType));
       } // HANDLE BINARY OPERATORS
       else if (
@@ -171,7 +175,7 @@ export function tokenize(srouceCode: string): any[] {
                           throw `DISPLAY command not found do you mean DISPLAY: ?`;
                       }
                       tokens.push(token(ident, reserved));
-                      break;
+                      console.log("WENT", src[0])
                   } else {
                       // Unrecognized name must mean user defined symbol.
                       if (ident == "") break;
@@ -179,6 +183,7 @@ export function tokenize(srouceCode: string): any[] {
                       while (src.length > 0 && (src[0] != "=" && src[0] != "\n" && src[0] != "\r" && src[0] != " " && src[0] != ",")) {
                           ident += src.shift();
                       }
+                      console.log("IDENT", ident)
                       switch (token_data_type.value) {
                           case "FLOAT":
                               tokens.push(token(ident, TokenType.Identifier, "FloatLiteral"));
@@ -186,19 +191,21 @@ export function tokenize(srouceCode: string): any[] {
                           case "CHAR":
                               tokens.push(token(ident, TokenType.Identifier, "CharacterLiteral"));
                               break;
+                          case "BOOL":
+                            tokens.push(token(ident, TokenType.Identifier, "BooleanLiteral"));
+                            break;
                           default:
                               tokens.push(token(ident, TokenType.Identifier, "IntegerLiteral"));
                       }
-                      while (src[0] === " ") {
-                          console.log("WENT IN HERE", src.shift())
-          
-                      }
-                      console.log("NEW ONE ", src[0])
-                      if (src[0] == ",") {
-                        tokens.push(token(src.shift(), TokenType.COMMA));
-                      } else break;
+                      
                   }
-
+                  while (src[0] === " ") {
+                    src.shift()
+                  }
+                  if (src[0] == ",") {
+                    
+                    tokens.push(token(src.shift(), TokenType.COMMA));
+                  } else break;
               }
           } else if (isskippable(src[0])) {
               // Skip uneeded chars.

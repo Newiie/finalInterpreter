@@ -14,17 +14,20 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
 
     const tokenized = tokenize(data)
     // console.log(tokenized)
-    if (tokenized[tokenized.length - 2].type != TokenType.EOF) {
-      console.error("All codes are placed inside BEGIN CODE and END CODE!")
-      return;
+    const eofCount = tokenized.filter(token => token.type === TokenType.EOF).length;
+    const beginCount = tokenized.filter(token => token.type === TokenType.BEGIN).length;
+    console.log("EOF ", eofCount, "BEGIN ", beginCount)
+    if (eofCount != 1 || beginCount != 1) {
+        console.error("All codes must be placed inside BEGIN CODE and END CODE, and there should be exactly one BEGIN and one END!");
+        return;
     }
     const parser = new Parser()
     const env = new Environment();
 
     // Create Default Global Enviornment
     // env.declareVar("x", MK_NUMBER(100));
-    env.declareVar("true", MK_BOOL(true));
-    env.declareVar("false", MK_BOOL(false));
+    env.declareVar("TRUE", MK_BOOL(true));
+    env.declareVar("FALSE", MK_BOOL(false));
     // env.declareVar("null", MK_NULL(), false);
 
     // console.log(env.lookupVar("x"))

@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -74,6 +74,7 @@ export default class Parser {
         case TokenType.IntegerType:
         case TokenType.CharacterType:
         case TokenType.FloatType:
+        case TokenType.BoolType:
             return this.parse_var_declaration(); // returns an array of declarations
         case TokenType.NextLine:
             this.eat();
@@ -113,6 +114,8 @@ export default class Parser {
           return { kind: "FloatLiteral", value: parseFloat(this.eat().value)} as FloatLiteral;
         case TokenType.CharacterType:
           return { kind: "CharacterLiteral", value: this.eat().value} as CharacterLiteral;
+        case TokenType.StringType:
+          return { kind: "StringLiteral", value: this.eat().value} as StringLiteral;
         case TokenType.Comment:
           return this.parse_comment()
         case TokenType.NextLine:
@@ -179,6 +182,9 @@ export default class Parser {
         case "INT":
             DataType = "IntegerLiteral";
             break;
+        case "BOOL":
+          DataType = "BooleanLiteral";
+          break;
         default:
             console.error("Unknown data type ", DataTypeVariable.value);
             process.exit(1);
@@ -202,6 +208,9 @@ export default class Parser {
           case "INT":
               value = { kind: "IntegerLiteral", value: parseInt("0")} as IntegerLiteral
               break;
+          case "BOOL":
+            value = { kind: "BooleanLiteral", value: "TRUE"} as BooleanLiteral
+            break;
           default:
               console.error("Unknown data type ", DataTypeVariable.value);
               process.exit(1);

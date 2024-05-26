@@ -1,4 +1,4 @@
-import { NumberVal, RuntimeVal, MK_NULL, DisplayVal, FloatVal, CharVal } from "./values.ts";
+import { NumberVal, RuntimeVal, MK_NULL, DisplayVal, FloatVal, CharVal, StringVal } from "./values.ts";
 import {
     AssignmentExpr,
   BinaryExpr,
@@ -33,6 +33,11 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
           value: ((astNode as CharacterLiteral).value),
           type: "char",
         } as CharVal;
+      case "StringLiteral":
+        return {
+          value: ((astNode as StringLiteral).value),
+          type: "string",
+        } as StringVal;
     case "Identifier":
       return eval_identifier(astNode as Identifier, env);
     case "AssignmentExpr":

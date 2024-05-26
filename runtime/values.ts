@@ -1,4 +1,4 @@
-export type ValueType = "null" | "number" | "boolean" | "display" | "float" | "char";
+export type ValueType = "null" | "number" | "boolean" | "display" | "float" | "char" | "string";
 
 export interface RuntimeVal {
   type: ValueType;
@@ -32,6 +32,11 @@ export interface FloatVal extends RuntimeVal {
 
 export interface CharVal extends RuntimeVal {
   type: "char";
+  value: string;
+}
+
+export interface StringVal extends RuntimeVal {
+  type: "string";
   value: string;
 }
 
