@@ -13,6 +13,7 @@ export enum TokenType {
   BEGIN,
   END,
   DISPLAY,
+  SCAN,
   // SPECIAL CHARACTERS
   NextLine,
   EscapeChar,
@@ -44,7 +45,8 @@ export const KEYWORDS: Record<string, TokenType> = {
   BEGIN: TokenType.BEGIN,
   END: TokenType.EOF,
   CODE: TokenType.CODE,
-  DISPLAY: TokenType.DISPLAY
+  DISPLAY: TokenType.DISPLAY,
+  SCAN: TokenType.SCAN
 };
 
 function token(value = "", type: TokenType, dataType = ""): Token {
@@ -88,6 +90,8 @@ export function tokenize(srouceCode: string): any[] {
           tokens.push(token(src.shift(), TokenType.NewLine));
       } else if (src[0] == ",") {
         tokens.push(token(src.shift(), TokenType.COMMA));
+      } else if (src[0] == ":") {
+        tokens.push(token(src.shift(), TokenType.COLON));
       } else if (src[0] == "[") {
         src.shift() // eats [
         tokens.push(token(src.shift(), TokenType.EscapeChar));

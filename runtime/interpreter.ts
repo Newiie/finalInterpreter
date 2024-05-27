@@ -12,6 +12,7 @@ import {
   CharacterLiteral,
   EscapeLiteral,
   VarDeclaration,
+  Scan,
 } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 import { eval_program, eval_var_declaration } from "./eval/statements.ts";
@@ -53,6 +54,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
     // Handle unimplimented ast types as error.
     case "Display":
       return eval_display(astNode as Display, env);
+    case "Scan":
+      return eval_scan(astNode as Scan, env);
     default:
       console.error(
         "This AST Node has not yet been setup for interpretation.",
@@ -84,4 +87,31 @@ function eval_display(Node: Display, env: Environment): RuntimeVal {
   }
   console.log(outputString); // Output the constructed string
   return { type: "display", value: "success" } as DisplayVal;
+}
+
+function eval_scan(node: Scan, env: Environment): RuntimeVal {
+  const input = prompt(`Enter values for ${node.variables.map(v => v.symbol).join(", ")}:`)?.split(",").map(val => val.trim());
+
+  if (input && input.length === node.variables.length) {
+      node.variables.forEach((variable, index) => {
+          let value: RuntimeVal;
+          switch (variable.dataType) {
+              case "IntegerLiteral":
+                  value = { value: parseInt(input[index]), type: "number" } as NumberVal;
+                  break;
+              case "FloatLiteral":
+                  value = { value: parseFloat(input[index]), type: "float" } as FloatVal;
+                  break;
+              case "CharacterLiteral":
+                  value = { value: input[index], type: "char" } as CharVal;
+                  break;
+              default:
+                  throw new Error(`Unsupported data type: ${variable.dataType}`);
+          }
+          env.assignVar(variable.symbol, value);
+      });
+      return { type: "null", value: null } as RuntimeVal;
+  } else {
+      throw new Error("Input count does not match the number of variables in SCAN statement.");
+  }
 }

@@ -1,4 +1,8 @@
 BEGIN CODE
-  
-    DISPLAY: "a" & [$]
+    INT _a,_b2
+    DISPLAY: _a & _b2 & [#]
+    _a = _b2 = 100
+    DISPLAY: _a & _b2 & [#]
+    SCAN: _a,_b2
+    DISPLAY: _a & _b2 & [#]
 END CODE

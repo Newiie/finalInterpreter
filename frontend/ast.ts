@@ -5,6 +5,7 @@ export type NodeType =
   | "Program"
   | "VarDeclaration"
   | "NullLiteral"
+  | "Scan"
 
   // EXPRESSIONS
   | "IntegerLiteral"
@@ -93,6 +94,11 @@ export interface BooleanLiteral extends Expr {
 export interface Display extends Expr {
     kind: "Display"
     value: Array<Expr>
+}
+
+export interface Scan extends Stmt {
+    kind: "Scan";
+    variables: Identifier[];
 }
 
 export interface CharacterLiteral extends Expr {

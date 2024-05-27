@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -125,7 +125,8 @@ export default class Parser {
           return this.parse_var_declaration();
         case TokenType.DISPLAY:
           return this.parse_display();
-
+        case TokenType.SCAN:
+          return this.parse_scan();
         case TokenType.OpenParen: {
           this.eat(); // eat the opening paren
           const value = this.parse_expr();
@@ -168,6 +169,26 @@ export default class Parser {
     // console.log("DISPLAY TOKENS", left)
     return {kind: "Display", value: left} as Display
   }
+
+  private parse_scan(): Scan {
+    this.expect(TokenType.SCAN, "Expected 'SCAN' keyword.");
+    this.expect(TokenType.COLON, "Expected ':' after 'SCAN'.");
+
+    const variables: Identifier[] = [];
+    do {
+        const identifier = this.expect(TokenType.Identifier, "Expected identifier in SCAN statement.");
+        variables.push({ kind: "Identifier", symbol: identifier.value, dataType: identifier.dataType } as Identifier);
+        if (this.at().type == TokenType.COMMA) {
+            this.eat();
+        } else {
+            break;
+        }
+    } while (true);
+
+    this.expect(TokenType.NextLine, "Expected newline after SCAN statement.");
+
+    return { kind: "Scan", variables };
+}
 
   // LET IDENT;
   // ( LET | CONST ) IDENT = EXPR;
