@@ -17,6 +17,7 @@ export type NodeType =
   | "Display"
   | "AssignmentExpr"
   | "Identifier"
+  | "UnaryExpr"
   | "BinaryExpr"
   | "LogicalExpr"
   | "IfStmt"
@@ -44,6 +45,12 @@ export interface AssignmentExpr extends Expr {
     kind: "AssignmentExpr";
     assignee: Expr;
     value: Expr;
+}
+
+export interface UnaryExpr extends Expr {
+    kind: "UnaryExpr";
+    operator: TokenType;
+    operand: Expr;
 }
 
 export interface LogicalExpr {

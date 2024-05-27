@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, LogicalExpr, IfStmt, Block } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, LogicalExpr, IfStmt, Block, UnaryExpr } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -106,6 +106,7 @@ export default class Parser {
 private parse_logical_expr(): Expr {
   let left = this.parse_additive_expr();
 
+  
   while (this.at().type === TokenType.And || this.at().type === TokenType.Or) {
       const operator = this.eat().type;
       const right = this.parse_additive_expr();
@@ -114,11 +115,14 @@ private parse_logical_expr(): Expr {
 
   return left;
 }
+
   private parse_primary_expr(): any {
     const tk = this.at().type
     const dataType = this.at().dataType
     console.log("TK ", this.at())
     switch(tk) {
+        case TokenType.Not:
+          return this.parse_unary_expr();
         case TokenType.Identifier:
             return { kind: "Identifier", symbol: this.eat().value, dataType} as Identifier;
         case TokenType.Integer:
@@ -280,6 +284,11 @@ private parse_logical_expr(): Expr {
     return declarations;
 }
 
+private parse_unary_expr(): UnaryExpr {
+  const operator = this.eat().type; // eat the NOT token
+  const operand = this.parse_primary_expr();
+  return { kind: "UnaryExpr", operator, operand } as UnaryExpr;
+}
       
   private parse_additive_expr(): Expr {
     let left = this.parse_multiplicitave_expr();

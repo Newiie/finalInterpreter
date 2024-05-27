@@ -1,6 +1,7 @@
 export type ValueType = "null" | "number" | "boolean" | "display" | "float" | "char" | "string";
 
 export interface RuntimeVal {
+  value: any;
   type: ValueType;
 }
 

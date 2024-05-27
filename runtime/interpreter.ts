@@ -24,6 +24,7 @@ import {
   LogicalExpr,
   IfStmt,
   Block,
+  UnaryExpr,
 } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 import { eval_program, eval_var_declaration } from "./eval/statements.ts";
@@ -32,6 +33,7 @@ import {
   eval_binary_expr,
   eval_identifier,
   eval_logical_expr,
+  eval_unary_expr,
 } from "./eval/expressions.ts";
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
@@ -60,6 +62,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_identifier(astNode as Identifier, env);
     case "AssignmentExpr":
       return eval_assignment(astNode as AssignmentExpr, env);
+      case "UnaryExpr":
+        return eval_unary_expr(astNode as UnaryExpr, env);
     case "BinaryExpr":
       return eval_binary_expr(astNode as BinaryExpr, env);
     case "LogicalExpr":

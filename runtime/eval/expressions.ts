@@ -1,4 +1,4 @@
-import { AssignmentExpr, BinaryExpr, Identifier, IfStmt, LogicalExpr } from "../../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, Identifier, IfStmt, LogicalExpr, UnaryExpr } from "../../frontend/ast.ts";
 import { TokenType } from "../../frontend/lexer.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
@@ -58,6 +58,22 @@ export function eval_binary_expr(
 
   // One or both are NULL
   return MK_NULL();
+}
+
+export function eval_unary_expr(expr: UnaryExpr, env: Environment): RuntimeVal {
+  const operand = evaluate(expr.operand, env);
+  
+  if (expr.operator === TokenType.Not) {
+    if (operand.type !== "boolean") {
+      throw new Error(`Operator 'NOT' can only be applied to boolean values. Got ${operand.type}.`);
+    }
+    return {
+      value: !operand.value,
+      type: "boolean",
+    } as BooleanVal;
+  }
+
+  throw new Error(`Unsupported unary operator ${expr.operator}`);
 }
 
 export function eval_logical_expr(
