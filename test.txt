@@ -1,6 +1,6 @@
 BEGIN CODE
     INT a = 1, b = 2, c = 3
-    BOOL d = (a <= b AND c < 200) AND (a > b)
+    BOOL d = (a <= b AND c < 200) AND (a <> b)
     BOOL f = TRUE, t = TRUE
     BOOL e = (f AND t) AND t
     #INT d = a + b
