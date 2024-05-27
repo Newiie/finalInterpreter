@@ -1,7 +1,8 @@
-import { AssignmentExpr, BinaryExpr, Identifier } from "../../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, Identifier, IfStmt, LogicalExpr } from "../../frontend/ast.ts";
+import { TokenType } from "../../frontend/lexer.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { FloatVal, MK_NULL, NumberVal, RuntimeVal } from "../values.ts";
+import { BooleanVal, FloatVal, MK_NULL, NumberVal, RuntimeVal } from "../values.ts";
 
 function eval_numeric_binary_expr(
   lhs: NumberVal,
@@ -56,6 +57,40 @@ export function eval_binary_expr(
   }
 
   // One or both are NULL
+  return MK_NULL();
+}
+
+export function eval_logical_expr(
+  logop: LogicalExpr,
+  env: Environment,
+): RuntimeVal {
+  const left = evaluate(logop.left, env);
+  const right = logop.right ? evaluate(logop.right, env) : null;
+
+  switch (logop.operator) {
+    case TokenType.And:
+      return { value: (left as BooleanVal).value && (right as BooleanVal).value, type: "boolean" } as BooleanVal;
+    case TokenType.Or:
+      return { value: (left as BooleanVal).value || (right as BooleanVal).value, type: "boolean" } as BooleanVal;
+    case TokenType.Not:
+      return { value: !(left as BooleanVal).value, type: "boolean" } as BooleanVal;
+    default:
+      throw `Unknown logical operator ${logop.operator}`;
+  }
+}
+
+export function eval_if_stmt(
+  ifStmt: IfStmt,
+  env: Environment,
+): RuntimeVal {
+  const condition = evaluate(ifStmt.condition, env);
+
+  if ((condition as BooleanVal).value) {
+    return evaluate(ifStmt.thenBranch, env);
+  } else if (ifStmt.elseBranch) {
+    return evaluate(ifStmt.elseBranch, env);
+  }
+
   return MK_NULL();
 }
 

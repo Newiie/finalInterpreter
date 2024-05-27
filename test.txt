@@ -1,8 +1,8 @@
 BEGIN CODE
-    INT _a,_b2
-    DISPLAY: _a & _b2 & [#]
-    _a = _b2 = 100
-    DISPLAY: _a & _b2 & [#]
-    SCAN: _a,_b2
-    DISPLAY: _a & _b2 & [#]
+BOOL x = FALSE, y = FALSE
+BOOL _and = x AND y
+BOOL _or = x OR y
+#BOOL _not = NOT x
+DISPLAY: _and & _or 
+#& _not
 END CODE

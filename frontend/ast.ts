@@ -1,4 +1,4 @@
-import { Token } from "./lexer";
+import { Token, TokenType } from "./lexer";
 
 export type NodeType =
   // STATEMENTS
@@ -18,6 +18,9 @@ export type NodeType =
   | "AssignmentExpr"
   | "Identifier"
   | "BinaryExpr"
+  | "LogicalExpr"
+  | "IfStmt"
+  | "Block"
   
 //   SPECIAL CHARACTER
   | "NewLine"
@@ -43,6 +46,24 @@ export interface AssignmentExpr extends Expr {
     value: Expr;
 }
 
+export interface LogicalExpr {
+    kind: "LogicalExpr";
+    operator: TokenType;
+    left: Expr;
+    right?: Expr;
+}
+
+export interface Block extends Stmt{
+    kind: "Block";
+    statements: Stmt[];
+  }
+  
+export interface IfStmt {
+    kind: "IfStmt";
+    condition: Expr;
+    thenBranch: Block;
+    elseBranch: Block | null;
+}
 
 export interface BinaryExpr extends Expr {
     left: Expr,

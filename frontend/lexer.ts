@@ -14,6 +14,11 @@ export enum TokenType {
   END,
   DISPLAY,
   SCAN,
+  IF,
+  ELSE,
+  ELSEIF,
+  BEGINIF,
+  ENDIF,
   // SPECIAL CHARACTERS
   NextLine,
   EscapeChar,
@@ -28,6 +33,9 @@ export enum TokenType {
   COLON,
   COMMA,
   Let,
+  And,
+  Or,
+  Not,
 }
 
 export interface Token {
@@ -46,7 +54,10 @@ export const KEYWORDS: Record<string, TokenType> = {
   END: TokenType.EOF,
   CODE: TokenType.CODE,
   DISPLAY: TokenType.DISPLAY,
-  SCAN: TokenType.SCAN
+  SCAN: TokenType.SCAN,
+  AND: TokenType.And,
+  OR: TokenType.Or,
+  NOT: TokenType.Not,
 };
 
 function token(value = "", type: TokenType, dataType = ""): Token {

@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, LogicalExpr, IfStmt, Block } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -7,7 +7,7 @@ import {
     Program,
     Stmt,
     StringLiteral,
-    VarDeclaration
+    VarDeclaration,
   } from "./ast.ts";
 
   import { Token, tokenize, TokenType, KEYWORDS } from "./lexer.ts";
@@ -79,6 +79,8 @@ export default class Parser {
         case TokenType.NextLine:
             this.eat();
             return;
+        case TokenType.IF:
+            return this.parse_if_stmt();
         default:
             return this.parse_expr();
     }
@@ -89,18 +91,29 @@ export default class Parser {
     return this.parse_assignment_expr();
   }
 
-  parse_assignment_expr(): Expr {
-    const left = this.parse_additive_expr();
-    
+  private parse_assignment_expr(): Expr {
+    const left = this.parse_logical_expr();
+
     if (this.at().type == TokenType.Equals) {
-      this.eat();
-      const value = this.parse_assignment_expr();
-      return {value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr
+        this.eat();
+        const value = this.parse_assignment_expr();
+        return { value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr;
     }
 
     return left;
+}
+
+private parse_logical_expr(): Expr {
+  let left = this.parse_additive_expr();
+
+  while (this.at().type === TokenType.And || this.at().type === TokenType.Or) {
+      const operator = this.eat().type;
+      const right = this.parse_additive_expr();
+      left = { kind: "LogicalExpr", operator, left, right } as LogicalExpr;
   }
 
+  return left;
+}
   private parse_primary_expr(): any {
     const tk = this.at().type
     const dataType = this.at().dataType
