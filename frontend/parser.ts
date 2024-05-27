@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -158,6 +158,8 @@ export default class Parser {
         left.push({ kind: "StringLiteral", value: this.eat().value} as StringLiteral)
       else if (this.at().type == TokenType.NewLine)
         left.push({ kind: "NewLine", value: this.eat().value} as NewLine)
+      else if (this.at().type == TokenType.EscapeChar)
+        left.push({ kind: "EscapeLiteral", value: this.eat().value} as EscapeLiteral)
       if (this.at().type == TokenType.NextLine) {
         break;
       }

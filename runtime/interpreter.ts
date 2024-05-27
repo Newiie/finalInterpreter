@@ -10,6 +10,7 @@ import {
   Stmt,
   StringLiteral,
   CharacterLiteral,
+  EscapeLiteral,
   VarDeclaration,
 } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
@@ -71,6 +72,9 @@ function eval_display(Node: Display, env: Environment): RuntimeVal {
       outputString += value !== undefined ? value : "undefined";
     } else if (stmt.kind === "StringLiteral") {
       const newStmt = stmt as StringLiteral
+      outputString += newStmt.value;
+    } else if (stmt.kind === "EscapeLiteral") {
+      const newStmt = stmt as EscapeLiteral
       outputString += newStmt.value;
     } else if (stmt.kind === "NewLine") {
       outputString += "\n";
