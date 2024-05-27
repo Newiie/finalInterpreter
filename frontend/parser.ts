@@ -87,35 +87,90 @@ export default class Parser {
 }
 
 
-  private parse_expr(): Expr {
-    return this.parse_assignment_expr();
-  }
-
-  private parse_assignment_expr(): Expr {
-    const left = this.parse_logical_expr();
-
-    if (this.at().type == TokenType.Equals) {
-        this.eat();
-        const value = this.parse_assignment_expr();
-        return { value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr;
-    }
-
-    return left;
+private parse_expr(): Expr {
+  return this.parse_assignment_expr();
 }
 
-private parse_logical_expr(): Expr {
-  let left = this.parse_additive_expr();
-
-  
-  while (this.at().type === TokenType.And || this.at().type === TokenType.Or) {
-      const operator = this.eat().type;
-      const right = this.parse_additive_expr();
-      left = { kind: "LogicalExpr", operator, left, right } as LogicalExpr;
+private parse_assignment_expr(): Expr {
+  const left = this.parse_logical_expr();
+  if (this.at().type == TokenType.Equals) {
+    console.log("HUH");
+    this.eat();
+    const value = this.parse_assignment_expr();
+    console.log("THE FINAL VALUE IS: ", value);
+    return { value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr;
   }
 
   return left;
 }
 
+private parse_logical_expr(): Expr {
+  let left = this.parse_comparison();
+
+  while (this.at().type === TokenType.And || this.at().type === TokenType.Or) {
+    const operator = this.eat().value;
+    const right = this.parse_comparison();
+    left = { kind: "BinaryExpr", operator, left, right } as BinaryExpr;
+  }
+
+  return left;
+}
+
+
+private parse_comparison(): Expr {
+  let left = this.parse_additive_expr();
+
+  while (["<", ">", "<=", ">=", "==", "<>"].includes(this.at().value)) {
+    const operator = this.eat().value;
+    const right = this.parse_additive_expr();
+    left = { kind: "BinaryExpr", left, right, operator } as BinaryExpr;
+  }
+  return left;
+}
+
+private parse_unary_expr(): UnaryExpr {
+  const operator = this.eat().type; // eat the NOT token
+  const operand = this.parse_primary_expr();
+  return { kind: "UnaryExpr", operator, operand } as UnaryExpr;
+}
+      
+  private parse_additive_expr(): Expr {
+    let left = this.parse_multiplicitave_expr();
+
+    while (this.at().value == "+" || this.at().value == "-") {
+      const operator = this.eat().value;
+      const right = this.parse_multiplicitave_expr();
+      left = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      } as BinaryExpr;
+    }
+
+    return left;
+  }
+
+  private parse_multiplicitave_expr(): Expr {
+    let left = this.parse_primary_expr();
+
+    while (
+      this.at().value == "/" || this.at().value == "*" || this.at().value == "%"
+    ) {
+      const operator = this.eat().value;
+      const right = this.parse_primary_expr();
+      left = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      } as BinaryExpr;
+    }
+
+    return left;
+  }
+
+  
   private parse_primary_expr(): any {
     const tk = this.at().type
     const dataType = this.at().dataType
@@ -283,46 +338,4 @@ private parse_logical_expr(): Expr {
 
     return declarations;
 }
-
-private parse_unary_expr(): UnaryExpr {
-  const operator = this.eat().type; // eat the NOT token
-  const operand = this.parse_primary_expr();
-  return { kind: "UnaryExpr", operator, operand } as UnaryExpr;
-}
-      
-  private parse_additive_expr(): Expr {
-    let left = this.parse_multiplicitave_expr();
-
-    while (this.at().value == "+" || this.at().value == "-") {
-      const operator = this.eat().value;
-      const right = this.parse_multiplicitave_expr();
-      left = {
-        kind: "BinaryExpr",
-        left,
-        right,
-        operator,
-      } as BinaryExpr;
-    }
-
-    return left;
-  }
-
-  private parse_multiplicitave_expr(): Expr {
-    let left = this.parse_primary_expr();
-
-    while (
-      this.at().value == "/" || this.at().value == "*" || this.at().value == "%"
-    ) {
-      const operator = this.eat().value;
-      const right = this.parse_primary_expr();
-      left = {
-        kind: "BinaryExpr",
-        left,
-        right,
-        operator,
-      } as BinaryExpr;
-    }
-
-    return left;
-  }
 }

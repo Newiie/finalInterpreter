@@ -25,6 +25,7 @@ export enum TokenType {
   Comment,
   OpenParen, CloseParen,
   BinaryOperator,
+  ComparisonOperator,
   SemiColon,
   Concatenation,
   NewLine,
@@ -131,9 +132,9 @@ export function tokenize(srouceCode: string): any[] {
           src.shift();
           tokens.push(token(ident, TokenType.StringType));
       } // HANDLE BINARY OPERATORS
-      else if (
+      else if ( 
         (src[0] === '+' && !isint(src[1])) || (src[0] === '-' && !isint(src[1]))  || src[0] == "*" || src[0] == "/" ||
-          src[0] == "%"
+          src[0] == "%" || (["<", ">", "<=", ">=", "==", "<>"].includes(src[0]))
       ) {
           tokens.push(token(src.shift(), TokenType.BinaryOperator));
       } // Handle Conditional & Assignment Tokens
@@ -202,7 +203,7 @@ export function tokenize(srouceCode: string): any[] {
                       // Unrecognized name must mean user defined symbol.
                       if (ident == "") break;
                       // console.log("LAST TOKEN ", tokens[tokens.length - 3])
-                      while (src.length > 0 && (src[0] != "=" && src[0] != "\n" && src[0] != "\r" && src[0] != " " && src[0] != ",")) {
+                      while (src.length > 0 && (src[0] != "=" && src[0] != "\n" && src[0] != "\r" && src[0] != " " && src[0] != "," && src[0] != ")")) {
                           ident += src.shift();
                       }
                       console.log("IDENT", ident)
