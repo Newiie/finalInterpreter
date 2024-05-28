@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, LogicalExpr, IfStmt, Block, UnaryExpr } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, IfStmt, Block, UnaryExpr, WhileStmt } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -22,6 +22,7 @@ export default class Parser {
   private at() {
       return this.tokens[0] as Token;
   }
+
   private eat() {
       const prev = this.tokens.shift() as Token;
       return prev;
@@ -68,7 +69,6 @@ export default class Parser {
     return program;
 }
 
-
   private parse_stmt(): any {
     switch (this.at().type) {
         case TokenType.IntegerType:
@@ -81,6 +81,8 @@ export default class Parser {
             return;
         case TokenType.IF:
             return this.parse_if_stmt();
+        case TokenType.WHILE:
+            return this.parse_while_stmt();    
         default:
             return this.parse_expr();
     }
@@ -89,36 +91,88 @@ export default class Parser {
     throw new Error("Method not implemented.");
   }
 
-
   private parse_expr(): Expr {
-    return this.parse_assignment_expr();
-  }
-
-  private parse_assignment_expr(): Expr {
-    const left = this.parse_logical_expr();
-
-    if (this.at().type == TokenType.Equals) {
-        this.eat();
-        const value = this.parse_assignment_expr();
-        return { value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr;
-    }
-
-    return left;
+  return this.parse_assignment_expr();
 }
 
-private parse_logical_expr(): Expr {
-  let left = this.parse_additive_expr();
-
-  
-  while (this.at().type === TokenType.And || this.at().type === TokenType.Or) {
-      const operator = this.eat().type;
-      const right = this.parse_additive_expr();
-      left = { kind: "LogicalExpr", operator, left, right } as LogicalExpr;
+private parse_assignment_expr(): Expr {
+  const left = this.parse_logical_expr();
+  if (this.at().type == TokenType.Equals) {
+    this.eat();
+    const value = this.parse_assignment_expr();
+    return { value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr;
   }
 
   return left;
 }
 
+private parse_logical_expr(): Expr {
+  let left = this.parse_comparison();
+
+  while (this.at().type === TokenType.And || this.at().type === TokenType.Or) {
+    const operator = this.eat().value;
+    const right = this.parse_comparison();
+    left = { kind: "BinaryExpr", operator, left, right } as BinaryExpr;
+  }
+
+  return left;
+}
+
+
+private parse_comparison(): Expr {
+  let left = this.parse_additive_expr();
+
+  while (["<", ">", "<=", ">=", "==", "<>"].includes(this.at().value)) {
+    const operator = this.eat().value;
+    const right = this.parse_additive_expr();
+    left = { kind: "BinaryExpr", left, right, operator } as BinaryExpr;
+  }
+  return left;
+}
+
+private parse_unary_expr(): UnaryExpr {
+  const operator = this.eat().type; // eat the NOT token
+  const operand = this.parse_primary_expr();
+  return { kind: "UnaryExpr", operator, operand } as UnaryExpr;
+}
+      
+  private parse_additive_expr(): Expr {
+    let left = this.parse_multiplicitave_expr();
+
+    while (this.at().value == "+" || this.at().value == "-") {
+      const operator = this.eat().value;
+      const right = this.parse_multiplicitave_expr();
+      left = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      } as BinaryExpr;
+    }
+
+    return left;
+  }
+
+  private parse_multiplicitave_expr(): Expr {
+    let left = this.parse_primary_expr();
+
+    while (
+      this.at().value == "/" || this.at().value == "*" || this.at().value == "%"
+    ) {
+      const operator = this.eat().value;
+      const right = this.parse_primary_expr();
+      left = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      } as BinaryExpr;
+    }
+
+    return left;
+  }
+
+  
   private parse_primary_expr(): any {
     const tk = this.at().type
     const dataType = this.at().dataType
@@ -210,6 +264,94 @@ private parse_logical_expr(): Expr {
     return { kind: "Scan", variables };
 }
 
+private parse_if_stmt(): IfStmt {
+  this.expect(TokenType.IF, "Expected 'IF' keyword");
+  this.expect(TokenType.OpenParen, "Expected '(' after 'IF'");
+
+  const condition = this.parse_expr();
+
+  this.expect(TokenType.CloseParen, "Expected ')' after condition");
+  this.expect(TokenType.NextLine, "Expected newline after condition");
+  this.expect(TokenType.BEGINIF, "Expected 'BEGIN IF'");
+
+  const thenBranch = this.parse_block();
+
+  this.expect(TokenType.ENDIF, "Expected 'END IF'");
+  let elseBranch: Block | IfStmt | undefined = undefined;
+  this.expect(TokenType.NextLine, "Expected newline");
+
+  if (this.at().type === TokenType.ELSE) {
+    this.eat(); // consume 'ELSE'
+    if (this.at().type === TokenType.IF) {
+      elseBranch = this.parse_if_stmt();
+    } else {
+      this.expect(TokenType.NextLine, "Expected newline after condition");
+      this.expect(TokenType.BEGINIF, "Expected 'BEGIN IF' after 'ELSE'");
+      elseBranch = this.parse_block();
+      this.expect(TokenType.ENDIF, "Expected 'END IF'");
+    }
+  } 
+  return {
+    kind: "IfStmt",
+    condition,
+    thenBranch,
+    elseBranch,
+  } as IfStmt;
+}
+
+private parse_block(): Block {
+  const body: Stmt[] = [];
+  while (this.not_eof() && this.at().type !== TokenType.ENDWHILE) {
+    const stmt = this.parse_stmt();
+    if (stmt != undefined) {
+      if (Array.isArray(stmt)) {
+        body.push(...stmt); // spread the array into the body
+      } else if (stmt) {
+        body.push(stmt);
+      }
+    }
+  }
+  return { kind: "Block", body } as Block;
+}
+
+private parse_while_stmt(): WhileStmt {
+  this.expect(TokenType.WHILE, "Expected 'WHILE' keyword");
+  this.expect(TokenType.OpenParen, "Expected '(' after 'WHILE'");
+
+  const condition = this.parse_expr();
+
+  this.expect(TokenType.CloseParen, "Expected ')' after condition");
+  this.expect(TokenType.NextLine, "Expected newline after condition");
+  this.expect(TokenType.BEGINWHILE, "Expected 'BEGIN WHILE'");
+
+  const body = this.parse_block();
+
+  this.expect(TokenType.ENDWHILE, "Expected 'END WHILE'");
+  this.expect(TokenType.NextLine, "Expected newline");
+
+  return {
+      kind: "WhileStmt",
+      condition,
+      body,
+  } as WhileStmt;
+}
+
+private parse_while_block(): Block {
+  
+  const body: Stmt[] = [];
+  while (this.not_eof() && this.at().type !== TokenType.ENDWHILE) {
+      const stmt = this.parse_stmt();
+      if (stmt != undefined) {
+          if (Array.isArray(stmt)) {
+              body.push(...stmt); // spread the array into the body
+          } else if (stmt) {
+              body.push(stmt);
+          }
+      }
+  }
+  return { kind: "Block", body } as Block;
+}
+
   // LET IDENT;
   // ( LET | CONST ) IDENT = EXPR;
   parse_var_declaration(): VarDeclaration[] {
@@ -286,46 +428,4 @@ private parse_logical_expr(): Expr {
 
     return declarations;
 }
-
-private parse_unary_expr(): UnaryExpr {
-  const operator = this.eat().type; // eat the NOT token
-  const operand = this.parse_primary_expr();
-  return { kind: "UnaryExpr", operator, operand } as UnaryExpr;
-}
-      
-  private parse_additive_expr(): Expr {
-    let left = this.parse_multiplicitave_expr();
-
-    while (this.at().value == "+" || this.at().value == "-") {
-      const operator = this.eat().value;
-      const right = this.parse_multiplicitave_expr();
-      left = {
-        kind: "BinaryExpr",
-        left,
-        right,
-        operator,
-      } as BinaryExpr;
-    }
-
-    return left;
-  }
-
-  private parse_multiplicitave_expr(): Expr {
-    let left = this.parse_primary_expr();
-
-    while (
-      this.at().value == "/" || this.at().value == "*" || this.at().value == "%"
-    ) {
-      const operator = this.eat().value;
-      const right = this.parse_primary_expr();
-      left = {
-        kind: "BinaryExpr",
-        left,
-        right,
-        operator,
-      } as BinaryExpr;
-    }
-
-    return left;
-  }
 }

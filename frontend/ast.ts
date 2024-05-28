@@ -21,6 +21,7 @@ export type NodeType =
   | "BinaryExpr"
   | "LogicalExpr"
   | "IfStmt"
+  | "WhileStmt"
   | "Block"
   
 //   SPECIAL CHARACTER
@@ -53,25 +54,24 @@ export interface UnaryExpr extends Expr {
     operand: Expr;
 }
 
-export interface LogicalExpr {
-    kind: "LogicalExpr";
-    operator: TokenType;
-    left: Expr;
-    right?: Expr;
-}
-
-export interface Block extends Stmt{
-    kind: "Block";
-    statements: Stmt[];
-  }
-  
-export interface IfStmt {
+export interface IfStmt extends Stmt {
     kind: "IfStmt";
     condition: Expr;
     thenBranch: Block;
-    elseBranch: Block | null;
+    elseBranch?: Block | IfStmt; 
+  }
+  
+  export interface WhileStmt extends Stmt {
+    kind: "WhileStmt";
+    condition: Expr;
+    body: Block;
 }
+  export interface Block extends Stmt {
+    kind: "Block";
+    body: Stmt[];
+  }
 
+  
 export interface BinaryExpr extends Expr {
     left: Expr,
     right: Expr,

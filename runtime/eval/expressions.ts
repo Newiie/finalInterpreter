@@ -1,4 +1,5 @@
-import { AssignmentExpr, BinaryExpr, Identifier, IfStmt, LogicalExpr, UnaryExpr } from "../../frontend/ast.ts";
+import { env } from "process";
+import { AssignmentExpr, BinaryExpr, Block, Identifier, IfStmt, UnaryExpr, WhileStmt } from "../../frontend/ast.ts";
 import { TokenType } from "../../frontend/lexer.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
@@ -9,23 +10,102 @@ function eval_numeric_binary_expr(
   rhs: NumberVal,
   operator: string,
   decimals: boolean
-): NumberVal  {
-  let result: number;
-  if (operator == "+") {
-    result = lhs.value + rhs.value;
-  } else if (operator == "-") {
-    result = lhs.value - rhs.value;
-  } else if (operator == "*") {
-    result = lhs.value * rhs.value;
-  } else if (operator == "/") {
-    // TODO: Division by zero checks
-    if (rhs.value == 0) throw `Math Error: cant divide by 0`
-    result = lhs.value / rhs.value;
-  } else {
-    result = lhs.value % rhs.value;
+): RuntimeVal {
+  let result: number | boolean;
+
+  switch (operator) {
+    case "+":
+      result = lhs.value + rhs.value;
+      break;
+    case "-":
+      result = lhs.value - rhs.value;
+      break;
+    case "*":
+      result = lhs.value * rhs.value;
+      break;
+    case "/":
+      if (rhs.value === 0) throw new Error("Math Error: can't divide by 0");
+      result = lhs.value / rhs.value;
+      break;
+    case "%":
+      result = lhs.value % rhs.value;
+      break;
+    case "<>":
+      result = lhs.value != rhs.value;
+      break;
+    case "==":
+      result = lhs.value == rhs.value;
+      break;
+    case ">=":
+      result = lhs.value >= rhs.value;
+      break;
+    case "<=":
+      result = lhs.value <= rhs.value;
+      break;
+    case "<":
+      result = lhs.value < rhs.value;
+      break;
+    case ">":
+      result = lhs.value > rhs.value;
+      break;
+    default:
+      throw new Error(`Unsupported operator: ${operator}`);
   }
-  // if (!decimals) return { value: parseInt(result.toString()), type: "number" };
-  return { value: result, type: "number" };
+
+  if (["<", ">", "<=", ">=", "==", "<>"].includes(operator)) {
+    return { value: result, type: "boolean" };
+  } else {
+    return { value: result, type: decimals ? "float" : "number" };
+  }
+}
+
+export function eval_if_stmt(stmt: IfStmt, env: Environment): RuntimeVal {
+  const condition = evaluate(stmt.condition, env) as BooleanVal;
+  if (condition.value) {
+    return evaluate(stmt.thenBranch, env);
+  } else if (stmt.elseBranch) {
+    return evaluate(stmt.elseBranch, env);
+  }
+  return MK_NULL();
+}
+
+export function eval_while_stmt(stmt: WhileStmt, env: Environment): RuntimeVal {
+  let result: RuntimeVal = MK_NULL();
+  while ((evaluate(stmt.condition, env) as BooleanVal).value) {
+      result = evaluate(stmt.body, env);
+  }
+  return result;
+}
+
+export function eval_block(block: Block, env: Environment): RuntimeVal {
+  let result: RuntimeVal = MK_NULL();
+  for (const stmt of block.body) {
+    result = evaluate(stmt, env);
+  }
+  return result;
+}
+
+export function eval_logical_expr(
+  lhs: BooleanVal,
+  rhs: BooleanVal,
+  operator: string,
+): RuntimeVal {
+  let result : boolean;
+  switch (operator) {
+    case "AND":
+      result = lhs.value && rhs.value;
+      break;
+    case "OR":
+      result =  lhs.value || rhs.value;
+      break;
+    case "NOT":
+      result = !lhs.value;
+      break;
+    default:
+      throw `Unknown logical operator ${operator}`;
+  }
+
+  return { value: result, type: "boolean" };
 }
 
 /**
@@ -34,25 +114,22 @@ function eval_numeric_binary_expr(
 export function eval_binary_expr(
   binop: BinaryExpr,
   env: Environment,
-): RuntimeVal {
+):  RuntimeVal {
   const lhs = evaluate(binop.left, env);
   const rhs = evaluate(binop.right, env);
 
-  // Only currently support numeric operations
-  if (lhs.type == "number" && rhs.type == "number") {
-
+  if ((lhs.type == "number" || lhs.type == "float") && (rhs.type == "number" || rhs.type == "float")) {
     return eval_numeric_binary_expr(
       lhs as NumberVal,
       rhs as NumberVal,
       binop.operator,
-      false,
+      lhs.type === "float" || rhs.type === "float"
     );
-  } else if (lhs.type == "float" || rhs.type == "float") {
-    return eval_numeric_binary_expr(
-      lhs as NumberVal,
-      rhs as NumberVal,
-      binop.operator,
-      true,
+  }  else if (lhs.type == "boolean" || rhs.type == "boolean")  {
+    return eval_logical_expr(
+      lhs as BooleanVal,
+      rhs as BooleanVal,
+      binop.operator, 
     );
   }
 
@@ -76,39 +153,6 @@ export function eval_unary_expr(expr: UnaryExpr, env: Environment): RuntimeVal {
   throw new Error(`Unsupported unary operator ${expr.operator}`);
 }
 
-export function eval_logical_expr(
-  logop: LogicalExpr,
-  env: Environment,
-): RuntimeVal {
-  const left = evaluate(logop.left, env);
-  const right = logop.right ? evaluate(logop.right, env) : null;
-
-  switch (logop.operator) {
-    case TokenType.And:
-      return { value: (left as BooleanVal).value && (right as BooleanVal).value, type: "boolean" } as BooleanVal;
-    case TokenType.Or:
-      return { value: (left as BooleanVal).value || (right as BooleanVal).value, type: "boolean" } as BooleanVal;
-    case TokenType.Not:
-      return { value: !(left as BooleanVal).value, type: "boolean" } as BooleanVal;
-    default:
-      throw `Unknown logical operator ${logop.operator}`;
-  }
-}
-
-export function eval_if_stmt(
-  ifStmt: IfStmt,
-  env: Environment,
-): RuntimeVal {
-  const condition = evaluate(ifStmt.condition, env);
-
-  if ((condition as BooleanVal).value) {
-    return evaluate(ifStmt.thenBranch, env);
-  } else if (ifStmt.elseBranch) {
-    return evaluate(ifStmt.elseBranch, env);
-  }
-
-  return MK_NULL();
-}
 
 export function eval_identifier(
   ident: Identifier,

@@ -1,5 +1,7 @@
 BEGIN CODE
-    INT x
-    x = 3 + 4
-    DISPLAY: x
+  BOOL d = TRUE
+  WHILE (d)
+  BEGIN WHILE
+    DISPLAY: "hello"
+  END WHILE
 END CODE
