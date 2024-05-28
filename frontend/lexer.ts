@@ -1,3 +1,5 @@
+import { Console } from "console";
+
 export enum TokenType {
   Integer,
   Identifier,
@@ -59,6 +61,11 @@ export const KEYWORDS: Record<string, TokenType> = {
   AND: TokenType.And,
   OR: TokenType.Or,
   NOT: TokenType.Not,
+  IF: TokenType.IF,
+  ELSE: TokenType.ELSE,
+  "ELSE IF": TokenType.ELSEIF,
+  "BEGIN IF": TokenType.BEGINIF,
+  "END IF": TokenType.ENDIF,
 };
 
 function token(value = "", type: TokenType, dataType = ""): Token {
@@ -208,16 +215,28 @@ export function tokenize(srouceCode: string): any[] {
 
           // CHECK FOR RESERVED KEYWORDS
           const reserved = KEYWORDS[ident];
+          
+          console.log(ident);
           // If value is not undefined then the identifier is
           // recognized keyword
 
-          if (typeof reserved == "number") {
+           if (ident == "BEGIN" || ident == "END" ) {
+          //   console.log("does this maake snese, ", src.slice(0,3));
+              if (src.slice(0,3).every(item => [" ","I","F"].includes(item))) {
+                ident += src.shift();
+                ident += src.shift();
+                ident += src.shift();
+                tokens.push(token(ident, KEYWORDS[ident]));
+              } else {
+                tokens.push(token(ident, reserved));
+              }
+          } else if (typeof reserved == "number") {
             if (ident == "DISPLAY" && src.shift() != ":") {
               throw `DISPLAY command not found do you mean DISPLAY: ?`;
             }
             tokens.push(token(ident, reserved));
             console.log("WENT", src[0]);
-          } else {
+          } else  {
             // Unrecognized name must mean user defined symbol.
             if (ident == "") break;
             // console.log("LAST TOKEN ", tokens[tokens.length - 3])

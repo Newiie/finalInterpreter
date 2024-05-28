@@ -21,7 +21,6 @@ import {
   EscapeLiteral,
   VarDeclaration,
   Scan,
-  LogicalExpr,
   IfStmt,
   Block,
   UnaryExpr,
@@ -34,6 +33,8 @@ import {
   eval_identifier,
   eval_logical_expr,
   eval_unary_expr,
+  eval_if_stmt,
+  eval_block,
 } from "./eval/expressions.ts";
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
@@ -66,8 +67,10 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
         return eval_unary_expr(astNode as UnaryExpr, env);
     case "BinaryExpr":
       return eval_binary_expr(astNode as BinaryExpr, env);
-    // case "LogicalExpr":
-    //   return eval_logical_expr(astNode as LogicalExpr, env);
+    case "IfStmt":
+      return eval_if_stmt(astNode as IfStmt, env);
+    case "Block":
+      return eval_block(astNode as Block, env);
     case "Program":
       return eval_program(astNode as Program, env);
     // Handle statements

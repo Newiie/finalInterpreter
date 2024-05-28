@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, LogicalExpr, IfStmt, Block, UnaryExpr } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, IfStmt, Block, UnaryExpr } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -22,6 +22,7 @@ export default class Parser {
   private at() {
       return this.tokens[0] as Token;
   }
+
   private eat() {
       const prev = this.tokens.shift() as Token;
       return prev;
@@ -39,6 +40,7 @@ export default class Parser {
     } 
 
     const prev = this.tokens.shift() as Token;
+    console.log("It's supposed to shift...", prev);
     if (!prev || prev.type != type) {
       console.error("Parser Error:\n", err, prev, " - Expecting: ", type);
       process.exit(1);
@@ -49,6 +51,7 @@ export default class Parser {
   
   public produceAST(sourceCode: string): Program {
     this.tokens = tokenize(sourceCode);
+    console.log("THESE ARE THE STARTING TOKENS:", this.tokens);
     const program: Program = {
         kind: "Program",
         body: [],
@@ -68,7 +71,6 @@ export default class Parser {
     return program;
 }
 
-
   private parse_stmt(): any {
     switch (this.at().type) {
         case TokenType.IntegerType:
@@ -86,8 +88,7 @@ export default class Parser {
     }
 }
 
-
-private parse_expr(): Expr {
+  private parse_expr(): Expr {
   return this.parse_assignment_expr();
 }
 
@@ -262,6 +263,65 @@ private parse_unary_expr(): UnaryExpr {
     return { kind: "Scan", variables };
 }
 
+private parse_if_stmt(): IfStmt {
+  this.expect(TokenType.IF, "Expected 'IF' keyword");
+  this.expect(TokenType.OpenParen, "Expected '(' after 'IF'");
+  const condition = this.parse_expr();
+  this.expect(TokenType.CloseParen, "Expected ')' after condition");
+  this.expect(TokenType.NextLine, "Expected newline after condition");
+  console.log("Are we getting here?");
+  this.expect(TokenType.BEGINIF, "Expected 'BEGIN IF'");
+  console.log("Is here where it goes wrong?")
+  const thenBranch = this.parse_block();
+  console.log("Then... here?")
+  this.expect(TokenType.ENDIF, "Expected 'END IF'");
+  console.log("Successfully ended!");
+  let elseBranch: Block | IfStmt | undefined = undefined;
+  this.expect(TokenType.NextLine, "Expected newline");
+  if (this.at().type === TokenType.ELSE) {
+    console.log("No else?");
+    this.eat(); // consume 'ELSE'
+    if (this.at().type === TokenType.IF) {
+      elseBranch = this.parse_if_stmt();
+    } else {
+      this.expect(TokenType.NextLine, "Expected newline after condition");
+      this.expect(TokenType.BEGINIF, "Expected 'BEGIN IF' after 'ELSE'");
+      elseBranch = this.parse_block();
+      this.expect(TokenType.ENDIF, "Expected 'END IF'");
+    }
+  } else if (this.at().type === TokenType.ELSEIF) {
+    this.eat(); // consume 'ELSEIF'
+    this.expect(TokenType.NextLine, "Expected newline after condition");
+    elseBranch = this.parse_if_stmt();
+  } else {
+    console.log("ELSE isn't properly working in the conditionals, ", this.at());
+  }
+
+  return {
+    kind: "IfStmt",
+    condition,
+    thenBranch,
+    elseBranch,
+  } as IfStmt;
+}
+
+private parse_block(): Block {
+  const body: Stmt[] = [];
+  while (this.not_eof() && this.at().type !== TokenType.ENDIF) {
+    console.log("I'm parsing a block", this.tokens);
+    const stmt = this.parse_stmt();
+    if (stmt != undefined) {
+      if (Array.isArray(stmt)) {
+        body.push(...stmt); // spread the array into the body
+      } else if (stmt) {
+        body.push(stmt);
+      }
+    }
+
+  }
+  return { kind: "Block", body } as Block;
+}
+
   // LET IDENT;
   // ( LET | CONST ) IDENT = EXPR;
   parse_var_declaration(): VarDeclaration[] {
@@ -336,6 +396,7 @@ private parse_unary_expr(): UnaryExpr {
         }
     }
 
+    console.log("DECLARATIONS: ", declarations);
     return declarations;
 }
 }
