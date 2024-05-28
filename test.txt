@@ -1,5 +1,6 @@
 BEGIN CODE
-  WHILE (TRUE)
+  BOOL d = TRUE
+  WHILE (d)
   BEGIN WHILE
     DISPLAY: "hello"
   END WHILE
