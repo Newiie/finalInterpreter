@@ -262,14 +262,19 @@ private parse_unary_expr(): UnaryExpr {
 private parse_if_stmt(): IfStmt {
   this.expect(TokenType.IF, "Expected 'IF' keyword");
   this.expect(TokenType.OpenParen, "Expected '(' after 'IF'");
+
   const condition = this.parse_expr();
+
   this.expect(TokenType.CloseParen, "Expected ')' after condition");
   this.expect(TokenType.NextLine, "Expected newline after condition");
   this.expect(TokenType.BEGINIF, "Expected 'BEGIN IF'");
+
   const thenBranch = this.parse_block();
+
   this.expect(TokenType.ENDIF, "Expected 'END IF'");
   let elseBranch: Block | IfStmt | undefined = undefined;
   this.expect(TokenType.NextLine, "Expected newline");
+
   if (this.at().type === TokenType.ELSE) {
     console.log("No else?");
     this.eat(); // consume 'ELSE'
@@ -281,12 +286,7 @@ private parse_if_stmt(): IfStmt {
       elseBranch = this.parse_block();
       this.expect(TokenType.ENDIF, "Expected 'END IF'");
     }
-  } else if (this.at().type === TokenType.ELSEIF) {
-    this.eat(); // consume 'ELSEIF'
-    this.expect(TokenType.NextLine, "Expected newline after condition");
-    elseBranch = this.parse_if_stmt();
-  }
-
+  } 
   return {
     kind: "IfStmt",
     condition,
@@ -306,7 +306,6 @@ private parse_block(): Block {
         body.push(stmt);
       }
     }
-
   }
   return { kind: "Block", body } as Block;
 }
