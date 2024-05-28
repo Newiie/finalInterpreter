@@ -82,16 +82,22 @@ export function eval_logical_expr(
   rhs: BooleanVal,
   operator: string,
 ): RuntimeVal {
+  let result : boolean;
   switch (operator) {
     case "AND":
-      return lhs && rhs;
+      result = lhs.value && rhs.value;
+      break;
     case "OR":
-      return lhs || rhs;
+      result =  lhs.value || rhs.value;
+      break;
     case "NOT":
-      return lhs && lhs;
+      result = !lhs.value;
+      break;
     default:
       throw `Unknown logical operator ${operator}`;
   }
+
+  return { value: result, type: "boolean" };
 }
 
 /**
