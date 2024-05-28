@@ -1,5 +1,5 @@
 import { env } from "process";
-import { AssignmentExpr, BinaryExpr, Block, Identifier, IfStmt, UnaryExpr } from "../../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, Block, Identifier, IfStmt, UnaryExpr, WhileStmt } from "../../frontend/ast.ts";
 import { TokenType } from "../../frontend/lexer.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
@@ -67,6 +67,14 @@ export function eval_if_stmt(stmt: IfStmt, env: Environment): RuntimeVal {
     return evaluate(stmt.elseBranch, env);
   }
   return MK_NULL();
+}
+
+export function eval_while_stmt(stmt: WhileStmt, env: Environment): RuntimeVal {
+  let result: RuntimeVal = MK_NULL();
+  while ((evaluate(stmt.condition, env) as BooleanVal).value) {
+      result = evaluate(stmt.body, env);
+  }
+  return result;
 }
 
 export function eval_block(block: Block, env: Environment): RuntimeVal {

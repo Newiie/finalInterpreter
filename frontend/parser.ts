@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, IfStmt, Block, UnaryExpr } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, IfStmt, Block, UnaryExpr, WhileStmt } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -81,6 +81,8 @@ export default class Parser {
             return;
         case TokenType.IF:
             return this.parse_if_stmt();
+        case TokenType.WHILE:
+            return this.parse_while_stmt();    
         default:
             return this.parse_expr();
     }
@@ -276,7 +278,6 @@ private parse_if_stmt(): IfStmt {
   this.expect(TokenType.NextLine, "Expected newline");
 
   if (this.at().type === TokenType.ELSE) {
-    console.log("No else?");
     this.eat(); // consume 'ELSE'
     if (this.at().type === TokenType.IF) {
       elseBranch = this.parse_if_stmt();
@@ -297,7 +298,7 @@ private parse_if_stmt(): IfStmt {
 
 private parse_block(): Block {
   const body: Stmt[] = [];
-  while (this.not_eof() && this.at().type !== TokenType.ENDIF) {
+  while (this.not_eof() && this.at().type !== TokenType.ENDWHILE) {
     const stmt = this.parse_stmt();
     if (stmt != undefined) {
       if (Array.isArray(stmt)) {
@@ -306,6 +307,44 @@ private parse_block(): Block {
         body.push(stmt);
       }
     }
+  }
+  return { kind: "Block", body } as Block;
+}
+
+private parse_while_stmt(): WhileStmt {
+  this.expect(TokenType.WHILE, "Expected 'WHILE' keyword");
+  this.expect(TokenType.OpenParen, "Expected '(' after 'WHILE'");
+
+  const condition = this.parse_expr();
+
+  this.expect(TokenType.CloseParen, "Expected ')' after condition");
+  this.expect(TokenType.NextLine, "Expected newline after condition");
+  this.expect(TokenType.BEGINWHILE, "Expected 'BEGIN WHILE'");
+
+  const body = this.parse_block();
+
+  this.expect(TokenType.ENDWHILE, "Expected 'END WHILE'");
+  this.expect(TokenType.NextLine, "Expected newline");
+
+  return {
+      kind: "WhileStmt",
+      condition,
+      body,
+  } as WhileStmt;
+}
+
+private parse_while_block(): Block {
+  
+  const body: Stmt[] = [];
+  while (this.not_eof() && this.at().type !== TokenType.ENDWHILE) {
+      const stmt = this.parse_stmt();
+      if (stmt != undefined) {
+          if (Array.isArray(stmt)) {
+              body.push(...stmt); // spread the array into the body
+          } else if (stmt) {
+              body.push(stmt);
+          }
+      }
   }
   return { kind: "Block", body } as Block;
 }

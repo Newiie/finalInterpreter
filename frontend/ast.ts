@@ -21,6 +21,7 @@ export type NodeType =
   | "BinaryExpr"
   | "LogicalExpr"
   | "IfStmt"
+  | "WhileStmt"
   | "Block"
   
 //   SPECIAL CHARACTER
@@ -60,11 +61,17 @@ export interface IfStmt extends Stmt {
     elseBranch?: Block | IfStmt; 
   }
   
+  export interface WhileStmt extends Stmt {
+    kind: "WhileStmt";
+    condition: Expr;
+    body: Block;
+}
   export interface Block extends Stmt {
     kind: "Block";
     body: Stmt[];
   }
 
+  
 export interface BinaryExpr extends Expr {
     left: Expr,
     right: Expr,

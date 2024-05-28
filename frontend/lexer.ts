@@ -39,6 +39,9 @@ export enum TokenType {
   And,
   Or,
   Not,
+  BEGINWHILE,
+  WHILE,
+  ENDWHILE,
 }
 
 export interface Token {
@@ -66,6 +69,9 @@ export const KEYWORDS: Record<string, TokenType> = {
   "ELSE IF": TokenType.ELSEIF,
   "BEGIN IF": TokenType.BEGINIF,
   "END IF": TokenType.ENDIF,
+  WHILE: TokenType.WHILE,
+  "BEGIN WHILE": TokenType.BEGINWHILE,
+  "END WHILE": TokenType.ENDWHILE
 };
 
 function token(value = "", type: TokenType, dataType = ""): Token {
@@ -221,11 +227,19 @@ export function tokenize(srouceCode: string): any[] {
           // recognized keyword
 
            if (ident == "BEGIN" || ident == "END" ) {
-          //   console.log("does this maake snese, ", src.slice(0,3));
               if (src.slice(0,3).every(item => [" ","I","F"].includes(item))) {
                 ident += src.shift();
                 ident += src.shift();
                 ident += src.shift();
+                tokens.push(token(ident, KEYWORDS[ident]));
+              } else if (src.slice(0,6).every(item => [" ","W","H","I","L","E"].includes(item))) {
+                ident += src.shift();
+                ident += src.shift();
+                ident += src.shift();
+                ident += src.shift();
+                ident += src.shift();
+                ident += src.shift();
+                // console.log(ident);
                 tokens.push(token(ident, KEYWORDS[ident]));
               } else {
                 tokens.push(token(ident, reserved));
@@ -239,7 +253,6 @@ export function tokenize(srouceCode: string): any[] {
           } else  {
             // Unrecognized name must mean user defined symbol.
             if (ident == "") break;
-            // console.log("LAST TOKEN ", tokens[tokens.length - 3])
             while (
               src.length > 0 &&
               src[0] != "=" &&
