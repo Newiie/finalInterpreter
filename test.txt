@@ -1,8 +1,5 @@
 BEGIN CODE
-BOOL x = FALSE, y = FALSE
-BOOL _and = x AND y
-BOOL _or = x OR y
-BOOL _not = NOT x
-BOOL _notAnd = NOT _and
-DISPLAY: _and & _or & _not & _notAnd
+    INT x
+    x = 3 + 4
+    DISPLAY: x
 END CODE

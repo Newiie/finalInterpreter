@@ -85,6 +85,9 @@ export default class Parser {
             return this.parse_expr();
     }
 }
+  parse_if_stmt(): any {
+    throw new Error("Method not implemented.");
+  }
 
 
   private parse_expr(): Expr {
