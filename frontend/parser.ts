@@ -40,7 +40,6 @@ export default class Parser {
     } 
 
     const prev = this.tokens.shift() as Token;
-    console.log("It's supposed to shift...", prev);
     if (!prev || prev.type != type) {
       console.error("Parser Error:\n", err, prev, " - Expecting: ", type);
       process.exit(1);
@@ -51,7 +50,6 @@ export default class Parser {
   
   public produceAST(sourceCode: string): Program {
     this.tokens = tokenize(sourceCode);
-    console.log("THESE ARE THE STARTING TOKENS:", this.tokens);
     const program: Program = {
         kind: "Program",
         body: [],
@@ -95,10 +93,8 @@ export default class Parser {
 private parse_assignment_expr(): Expr {
   const left = this.parse_logical_expr();
   if (this.at().type == TokenType.Equals) {
-    console.log("HUH");
     this.eat();
     const value = this.parse_assignment_expr();
-    console.log("THE FINAL VALUE IS: ", value);
     return { value, assignee: left, kind: "AssignmentExpr" } as AssignmentExpr;
   }
 
@@ -269,13 +265,9 @@ private parse_if_stmt(): IfStmt {
   const condition = this.parse_expr();
   this.expect(TokenType.CloseParen, "Expected ')' after condition");
   this.expect(TokenType.NextLine, "Expected newline after condition");
-  console.log("Are we getting here?");
   this.expect(TokenType.BEGINIF, "Expected 'BEGIN IF'");
-  console.log("Is here where it goes wrong?")
   const thenBranch = this.parse_block();
-  console.log("Then... here?")
   this.expect(TokenType.ENDIF, "Expected 'END IF'");
-  console.log("Successfully ended!");
   let elseBranch: Block | IfStmt | undefined = undefined;
   this.expect(TokenType.NextLine, "Expected newline");
   if (this.at().type === TokenType.ELSE) {
@@ -293,8 +285,6 @@ private parse_if_stmt(): IfStmt {
     this.eat(); // consume 'ELSEIF'
     this.expect(TokenType.NextLine, "Expected newline after condition");
     elseBranch = this.parse_if_stmt();
-  } else {
-    console.log("ELSE isn't properly working in the conditionals, ", this.at());
   }
 
   return {
@@ -308,7 +298,6 @@ private parse_if_stmt(): IfStmt {
 private parse_block(): Block {
   const body: Stmt[] = [];
   while (this.not_eof() && this.at().type !== TokenType.ENDIF) {
-    console.log("I'm parsing a block", this.tokens);
     const stmt = this.parse_stmt();
     if (stmt != undefined) {
       if (Array.isArray(stmt)) {
@@ -396,7 +385,6 @@ private parse_block(): Block {
         }
     }
 
-    console.log("DECLARATIONS: ", declarations);
     return declarations;
 }
 }
