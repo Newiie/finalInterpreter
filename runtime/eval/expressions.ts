@@ -126,13 +126,13 @@ export function eval_binary_expr(
 ):  RuntimeVal {
   const lhs = evaluate(binop.left, env);
   const rhs = evaluate(binop.right, env);
-  console.log("BINOP ", binop)
+  // console.log("BINOP ", binop)
   let lhsType
   // const lhsType = env.lookupVar((lhs as Identifier).symbol)
   if (binop.left.kind == "Identifier") {
-    console.log("ITS IDENTIFIER", binop.left)
+    // console.log("ITS IDENTIFIER", binop.left)
     lhsType = env.lookupVar(binop.left.symbol)
-    console.log("LHS TYPE NUMBER", lhsType)
+    // console.log("LHS TYPE NUMBER", lhsType)
   }
   if ((lhs.type == "number" || lhs.type == "float") && (rhs.type == "number" || rhs.type == "float")) {
 
@@ -184,10 +184,10 @@ export function eval_assignment(node: AssignmentExpr, env: Environment): Runtime
     if (node.assignee.kind != "Identifier") {
         throw `Invalid assignment expr ${JSON.stringify(node.assignee)}`
     }
-    console.log("NODE", node)
+    // console.log("NODE", node)
     
     if ((node.assignee as Identifier).dataType == "DEFINED") {
-      console.log("LOOK UP ", env.lookupVar((node.assignee as Identifier).symbol))
+      // console.log("LOOK UP ", env.lookupVar((node.assignee as Identifier).symbol))
       switch(env.lookupVar((node.assignee as Identifier).symbol).type) {
         case "char":
           (node.assignee as Identifier).dataType = "CharacterLiteral"
@@ -207,14 +207,14 @@ export function eval_assignment(node: AssignmentExpr, env: Environment): Runtime
 
       }
     } 
-    console.log("NODE", node)
+    // console.log("NODE", node)
     if ((node.assignee as Identifier).dataType == "FloatLiteral" && node.value.kind == "IntegerLiteral" 
     || (node.assignee as Identifier).dataType == "IntegerLiteral" && node.value.kind == "FloatLiteral" ) {
-      console.log("CHECK 2")
+      // console.log("CHECK 2")
       const varname = (node.assignee as Identifier).symbol
       return env.assignVar(varname, evaluate(node.value, env))
     }
-    console.log("CHECk 3")
+    // console.log("CHECk 3")
     if (((node.assignee as Identifier).dataType != node.value.kind ) && node.value.kind != "AssignmentExpr" && node.value.kind != "BinaryExpr") throw `Data Type mismatch ${(node.assignee as Identifier).dataType} not equal to ${node.value.kind}`
 
     const varname = (node.assignee as Identifier).symbol

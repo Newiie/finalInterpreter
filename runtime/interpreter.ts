@@ -95,7 +95,7 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       case "UnaryExpr":
         return eval_unary_expr(astNode as UnaryExpr, env);
     case "BinaryExpr":
-      console.log("CHECK 1")
+      // console.log("CHECK 1")
       return eval_binary_expr(astNode as BinaryExpr, env);
     case "IfStmt":
       return eval_if_stmt(astNode as IfStmt, env);
@@ -138,9 +138,10 @@ function eval_display(Node: Display, env: Environment): RuntimeVal {
       const newStmt = Node.value[i] as StringLiteral;
       outputString += newStmt.value;
     } 
-    // else if (stmt.kind === "EscapeLiteral") {
-    //   const newStmt = stmt as EscapeLiteral;
-    //   outputString += newStmt.value;
+    else if (Node.value[i].kind === "EscapeLiteral") {
+      const newStmt = Node.value[i] as EscapeLiteral;
+      outputString += newStmt.value;
+    }
     else if (Node.value[i].kind === "NewLine") {
       outputString += "\n";
     } 

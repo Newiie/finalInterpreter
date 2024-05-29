@@ -1,5 +1,14 @@
 BEGIN CODE
-	INT b = 4, a = 2, c
-	c = (b / a) / 3
-	DISPLAY: c
+	INT x = 0, y = 0
+	WHILE (x < 5)
+	BEGIN WHILE
+		y = 0
+		WHILE (y <= x)
+		BEGIN WHILE
+			DISPLAY: [#]
+			y = y + 1
+		END WHILE
+		DISPLAY: $
+		x = x + 1
+	END WHILE
 END CODE
