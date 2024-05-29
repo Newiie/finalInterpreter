@@ -131,8 +131,6 @@ function eval_display(Node: Display, env: Environment): RuntimeVal {
     }
     else if (Node.value[i].kind === "Identifier") {
       const newStmt = Node.value[i] as Identifier;
-      console.log("ENV", env.variables);
-      console.log("Hello", Node.value[i], env.lookupVar(Node.value[i].symbol))
       const vara = env.lookupVar(newStmt.symbol) as NumberVal;
       const value = vara.value;
       outputString += value !== undefined ? value : "undefined";
