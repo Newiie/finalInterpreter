@@ -18,6 +18,15 @@ export default class Environment {
     return value;
   }
 
+  public checkVar(varname: string): boolean {
+    if (varname == undefined) {
+      console.log("UNDEFINED")
+      return false;
+    }
+    
+    if (this.variables.has(varname)) return true
+    return false;
+  }
   public assignVar(varname: string, value: RuntimeVal): RuntimeVal {
     const env = this.resolve(varname);
     env.variables.set(varname, value);

@@ -28,7 +28,7 @@ export type NodeType =
   | "NewLine"
   | "CommentExpr"
   | "EscapeLiteral"
-
+  | "ConcatExpr"
   ;
 
 export interface Stmt {
@@ -101,6 +101,11 @@ export interface NewLine extends Expr {
 
 export interface EscapeLiteral extends Expr {
     kind: "EscapeLiteral"
+    value: string
+}
+
+export interface ConcatExpr extends Expr {
+    kind: "ConcatExpr"
     value: string
 }
 

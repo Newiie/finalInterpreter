@@ -212,7 +212,7 @@ export function tokenize(srouceCode: string): any[] {
         // append new numeric token.
       } // Handle Identifier & Keyword Tokens.
       else if (isalpha(src[0]) || src[0] == "_") {
-        const token_data_type = tokens[tokens.length - 3];
+        const token_data_type = tokens[tokens.length - 1];
         while (src.length > 0) {
           let ident = "";
           while (src.length > 0 && (isalpha(src[0]) || src[0] == "_")) {
@@ -222,7 +222,7 @@ export function tokenize(srouceCode: string): any[] {
           // CHECK FOR RESERVED KEYWORDS
           const reserved = KEYWORDS[ident];
           
-          console.log(ident);
+          // console.log(ident);
           // If value is not undefined then the identifier is
           // recognized keyword
 
@@ -249,7 +249,7 @@ export function tokenize(srouceCode: string): any[] {
               throw `DISPLAY command not found do you mean DISPLAY: ?`;
             }
             tokens.push(token(ident, reserved));
-            console.log("WENT", src[0]);
+            // console.log("WENT", src[0]);
           } else  {
             // Unrecognized name must mean user defined symbol.
             if (ident == "") break;
@@ -264,7 +264,8 @@ export function tokenize(srouceCode: string): any[] {
             ) {
               ident += src.shift();
             }
-            console.log("IDENT", ident);
+            // console.log("IDENT", ident);
+            // console.log("DATA TY", token_data_type)
             switch (token_data_type.value) {
               case "FLOAT":
                 tokens.push(token(ident, TokenType.Identifier, "FloatLiteral"));
@@ -281,7 +282,7 @@ export function tokenize(srouceCode: string): any[] {
                 break;
               default:
                 tokens.push(
-                  token(ident, TokenType.Identifier, "IntegerLiteral")
+                  token(ident, TokenType.Identifier, "DEFINED")
                 );
             }
           }

@@ -1,7 +1,5 @@
 BEGIN CODE
-  BOOL d = TRUE
-  WHILE (d)
-  BEGIN WHILE
-    DISPLAY: "hello"
-  END WHILE
+	INT b = 4, a = 2, c
+	c = (b / a) / 3
+	DISPLAY: c
 END CODE

@@ -1,5 +1,5 @@
 import { MK_NULL } from "../runtime/values.ts";
-import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, IfStmt, Block, UnaryExpr, WhileStmt } from "./ast.ts";
+import { AssignmentExpr, CommentExpr, Display, NewLine, IntegerLiteral, FloatLiteral, CharacterLiteral, BooleanLiteral, EscapeLiteral, Scan, IfStmt, Block, UnaryExpr, WhileStmt, ConcatExpr } from "./ast.ts";
 import {
     BinaryExpr,
     Expr,
@@ -91,7 +91,7 @@ export default class Parser {
     throw new Error("Method not implemented.");
   }
 
-  private parse_expr(): Expr {
+private parse_expr(): Expr {
   return this.parse_assignment_expr();
 }
 
@@ -176,7 +176,7 @@ private parse_unary_expr(): UnaryExpr {
   private parse_primary_expr(): any {
     const tk = this.at().type
     const dataType = this.at().dataType
-    console.log("TK ", this.at())
+    // console.log("TK ", this.at())
     switch(tk) {
         case TokenType.Not:
           return this.parse_unary_expr();
@@ -199,6 +199,12 @@ private parse_unary_expr(): UnaryExpr {
           return this.parse_var_declaration();
         case TokenType.DISPLAY:
           return this.parse_display();
+        case TokenType.EscapeChar:
+          return { kind: "EscapeLiteral", value: this.eat().value} as EscapeLiteral
+        case TokenType.NewLine:
+          return { kind: "NewLine", value: this.eat().value} as NewLine
+        case TokenType.Concatenation:
+          return { kind: "ConcatExpr", value: this.eat().value} as ConcatExpr
         case TokenType.SCAN:
           return this.parse_scan();
         case TokenType.OpenParen: {
@@ -216,33 +222,35 @@ private parse_unary_expr(): UnaryExpr {
     }
     
   }
-  parse_comment(): any {
-    while (this.at().type != TokenType.NextLine) {
-      console.log("AT, ", this.at())
-      this.eat()
-    }
-  }
-
   parse_display(): any {
     this.expect(TokenType.DISPLAY, "This expects DISPLAY KEYWORD")
     let left: Expr[] = []
     while (true) {
-      if (this.at().type == TokenType.Identifier)
-        left.push({ kind: "Identifier", symbol: this.eat().value} as Identifier)
-      else if (this.at().type == TokenType.StringType)
-        left.push({ kind: "StringLiteral", value: this.eat().value} as StringLiteral)
-      else if (this.at().type == TokenType.NewLine)
-        left.push({ kind: "NewLine", value: this.eat().value} as NewLine)
-      else if (this.at().type == TokenType.EscapeChar)
-        left.push({ kind: "EscapeLiteral", value: this.eat().value} as EscapeLiteral)
+      // if (this.at().type == TokenType.Identifier)
+      //   left.push({ kind: "Identifier", symbol: this.eat().value} as Identifier)
+      // else if (this.at().type == TokenType.StringType)
+      //   left.push({ kind: "StringLiteral", value: this.eat().value} as StringLiteral)
+      // else if (this.at().type == TokenType.NewLine)
+      //   left.push({ kind: "NewLine", value: this.eat().value} as NewLine)
+      // else if (this.at().type == TokenType.EscapeChar)
+      //   left.push({ kind: "EscapeLiteral", value: this.eat().value} as EscapeLiteral)
       if (this.at().type == TokenType.NextLine) {
         break;
       }
-      this.expect(TokenType.Concatenation, "Display expects concatatination symbol")
+      left.push(this.parse_stmt())
+      // this.expect(TokenType.Concatenation, "Display expects concatatination symbol")
     }
     // console.log("DISPLAY TOKENS", left)
     return {kind: "Display", value: left} as Display
   }
+
+  parse_comment(): any {
+    while (this.at().type != TokenType.NextLine) {
+      // console.log("AT, ", this.at())
+      this.eat()
+    }
+  }
+
 
   private parse_scan(): Scan {
     this.expect(TokenType.SCAN, "Expected 'SCAN' keyword.");

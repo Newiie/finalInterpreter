@@ -11,7 +11,10 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
       console.error("No such file with .CODE extension found.");
       return;
     }
-
+    const parser = new Parser()
+    const env = new Environment();
+    env.declareVar("null", MK_NULL());
+    // env.declareVar("x", MK_NUMBER(100));
     const tokenized = tokenize(data)
     const eofCount = tokenized.filter(token => token.type === TokenType.EOF).length;
     const beginCount = tokenized.filter(token => token.type === TokenType.BEGIN).length;
@@ -22,13 +25,12 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
         return;
     }
 
-    const parser = new Parser()
-    const env = new Environment();
+
     // Create Default Global Enviornment
-    // env.declareVar("x", MK_NUMBER(100));
-    env.declareVar("TRUE", MK_BOOL(true));
-    env.declareVar("FALSE", MK_BOOL(false));
-    // env.declareVar("null", MK_NULL(), false);
+  
+    // env.declareVar("TRUE", MK_BOOL(true));
+    // env.declareVar("FALSE", MK_BOOL(false));
+   
 
     // console.log(env.lookupVar("x"))
     // console.log(env.lookupVar("true"))
@@ -42,7 +44,7 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     ast.body = filteredArray
     console.log("FILTERED ", filteredArray)
     const result = evaluate(ast, env);
-    console.log("NO ERROR!")
-    console.log(result);
+    console.log("\nNO ERROR!")
+    // console.log(result);
 });
 
