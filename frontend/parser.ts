@@ -87,9 +87,6 @@ export default class Parser {
             return this.parse_expr();
     }
 }
-  parse_if_stmt(): any {
-    throw new Error("Method not implemented.");
-  }
 
 private parse_expr(): Expr {
   return this.parse_assignment_expr();
@@ -309,7 +306,7 @@ private parse_if_stmt(): IfStmt {
 
 private parse_block(): Block {
   const body: Stmt[] = [];
-  while (this.not_eof() && this.at().type !== TokenType.ENDWHILE) {
+  while (this.not_eof() && this.at().type !== TokenType.ENDIF) {
     const stmt = this.parse_stmt();
     if (stmt != undefined) {
       if (Array.isArray(stmt)) {
@@ -332,7 +329,7 @@ private parse_while_stmt(): WhileStmt {
   this.expect(TokenType.NextLine, "Expected newline after condition");
   this.expect(TokenType.BEGINWHILE, "Expected 'BEGIN WHILE'");
 
-  const body = this.parse_block();
+  const body = this.parse_while_block();
 
   this.expect(TokenType.ENDWHILE, "Expected 'END WHILE'");
   this.expect(TokenType.NextLine, "Expected newline");
