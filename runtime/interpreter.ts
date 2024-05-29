@@ -40,6 +40,7 @@ import {
   eval_block,
   eval_while_stmt,
 } from "./eval/expressions.ts";
+import { error } from "console";
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
   // console.log("BINOP ", astNode)
@@ -130,6 +131,8 @@ function eval_display(Node: Display, env: Environment): RuntimeVal {
     }
     else if (Node.value[i].kind === "Identifier") {
       const newStmt = Node.value[i] as Identifier;
+      console.log("ENV", env.variables);
+      console.log("Hello", Node.value[i], env.lookupVar(Node.value[i].symbol))
       const vara = env.lookupVar(newStmt.symbol) as NumberVal;
       const value = vara.value;
       outputString += value !== undefined ? value : "undefined";
@@ -162,6 +165,7 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
     .map((val) => val.trim());
 
   if (input && input.length === node.variables.length) {
+    console.log("EVAL SCAN IF");
     node.variables.forEach((variable, index) => {
 
       let value: RuntimeVal;
@@ -198,6 +202,22 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
                 value: parseFloat(input[index]),
                 type: "float",
               } as FloatVal;
+              case "boolean":
+                let temp;
+                console.log(input[index]);
+                if (input[index] == "\"FALSE\"") {
+                  temp = false;
+                } else if (input[index] == "\"TRUE\"") {
+                  temp = true;
+                } else {
+                  throw "Input data does not match variable datatype";
+                }
+
+                value = {
+                  value: temp,
+                  type: "boolean",
+                } as BooleanVal;
+                break;
               break;
           }
           break;

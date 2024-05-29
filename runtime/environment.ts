@@ -2,7 +2,7 @@ import { RuntimeVal } from "./values.ts";
 
 export default class Environment {
   private parent?: Environment;
-  private variables: Map<string, RuntimeVal>;
+  public variables: Map<string, RuntimeVal>;
 
   constructor(parentENV?: Environment) {
     this.parent = parentENV;

@@ -1,14 +1,12 @@
 BEGIN CODE
-	INT x = 0, y = 0
-	WHILE (x < 5)
-	BEGIN WHILE
-		y = 0
-		WHILE (y <= x)
-		BEGIN WHILE
-			DISPLAY: [#]
-			y = y + 1
-		END WHILE
-		DISPLAY: $
-		x = x + 1
-	END WHILE
+    BOOL x
+    SCAN: x
+    IF (x)
+    BEGIN IF
+        DISPLAY: x
+    END IF
+    ELSE
+    BEGIN IF
+        DISPLAY: "ok"
+    END IF
 END CODE

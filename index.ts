@@ -28,8 +28,8 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
 
     // Create Default Global Enviornment
   
-    // env.declareVar("TRUE", MK_BOOL(true));
-    // env.declareVar("FALSE", MK_BOOL(false));
+     env.declareVar("true", MK_BOOL(true));
+     env.declareVar("false", MK_BOOL(false));
    
 
     // console.log(env.lookupVar("x"))
@@ -42,7 +42,7 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     
     let filteredArray = ast.body.filter(element => element !== undefined);
     ast.body = filteredArray
-    console.log("FILTERED ", filteredArray)
+    // console.log("FILTERED ", filteredArray)
     const result = evaluate(ast, env);
     console.log("\nNO ERROR!")
     // console.log(result);
