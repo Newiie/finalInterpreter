@@ -1,40 +1,5 @@
 BEGIN CODE
-    INT x = 0, y = 0
-    INT num
-    SCAN: num
-    WHILE (x < num)
-    BEGIN WHILE
-        y = 0
-        WHILE (y <= x)
-        BEGIN WHILE
-            IF  (x % 2 == 0)
-            BEGIN IF
-                DISPLAY: x & [#]
-                IF (x == 0)
-                BEGIN IF
-                    DISPLAY: "what's up"
-                    IF (y == 0)
-                    BEGIN IF
-                        DISPLAY: "what's down"
-                        BOOL d = "TRUE"
-                        WHILE (NOT d) 
-                        BEGIN WHILE
-                            DISPLAY: "loop"
-                        END WHILE
-                    END IF
-                    ELSE
-                    BEGIN IF
-                        DISPLAY: "else what's down"
-                    END IF
-                END IF
-                ELSE
-                BEGIN IF
-                    DISPLAY: "else what's up"
-                END IF
-            END IF
-            y = y + 1
-        END WHILE
-        DISPLAY: $
-        x = x + 1
-    END WHILE
+	INT x = 5
+	x = 22.2 / 2
+    DISPLAY: x
 END CODE

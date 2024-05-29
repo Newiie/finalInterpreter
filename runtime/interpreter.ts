@@ -163,7 +163,7 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
     .map((val) => val.trim());
 
   if (input && input.length === node.variables.length) {
-    console.log("EVAL SCAN IF");
+    // console.log("EVAL SCAN IF");
     node.variables.forEach((variable, index) => {
 
       let value: RuntimeVal;
@@ -184,7 +184,7 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
           value = { value: input[index], type: "char" } as CharVal;
           break;
         case "DEFINED":
-          console.log("LOOK UP ", env.lookupVar((variable as Identifier).symbol))
+          // console.log("LOOK UP ", env.lookupVar((variable as Identifier).symbol))
           switch(env.lookupVar((variable as Identifier).symbol).type) {
             case "char":
               value = { value: input[index], type: "char" } as CharVal;
@@ -202,7 +202,7 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
               } as FloatVal;
               case "boolean":
                 let temp;
-                console.log(input[index]);
+                // console.log(input[index]);
                 if (input[index] == "\"FALSE\"") {
                   temp = false;
                 } else if (input[index] == "\"TRUE\"") {
@@ -216,7 +216,6 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
                   type: "boolean",
                 } as BooleanVal;
                 break;
-              break;
           }
           break;
         default:

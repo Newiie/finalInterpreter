@@ -215,9 +215,14 @@ export function tokenize(srouceCode: string): any[] {
         const token_data_type = tokens[tokens.length - 1];
         while (src.length > 0) {
           let ident = "";
-          while (src.length > 0 && (isalpha(src[0]) || src[0] == "_")) {
+          while (src.length > 0 && (isalpha(src[0]) || src[0] == "_") ) {
+
+            if (src[0] == "<" || src[0] == ">" || src[0] == "=" || src[0] == "!") {
+              break;
+            }
             ident += src.shift();
           }
+          // console.log("IDENT ", ident)
 
           // CHECK FOR RESERVED KEYWORDS
           const reserved = KEYWORDS[ident];

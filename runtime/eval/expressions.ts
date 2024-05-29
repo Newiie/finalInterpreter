@@ -218,5 +218,21 @@ export function eval_assignment(node: AssignmentExpr, env: Environment): Runtime
     if (((node.assignee as Identifier).dataType != node.value.kind ) && node.value.kind != "AssignmentExpr" && node.value.kind != "BinaryExpr") throw `Data Type mismatch ${(node.assignee as Identifier).dataType} not equal to ${node.value.kind}`
 
     const varname = (node.assignee as Identifier).symbol
-    return env.assignVar(varname, evaluate(node.value, env))
+    const nodeValue = evaluate(node.value, env)
+    // console.log("NODE VAL ", nodeValue, node.assignee)
+
+    // check if they are the same
+    switch(node.assignee.dataType) {
+      case "BooleanLiteral":
+        if (nodeValue.type != "boolean") throw "Error: Data Type mistmatch"
+        break;
+      case "IntegerLiteral":
+        if (nodeValue.type != "number" && nodeValue.type != "float") throw "Error: Data Type mistmatch"
+        nodeValue.value = parseInt(nodeValue.value)
+        break;
+      case "CharacterLiteral":
+        if (nodeValue.type != "char") throw "Error: Data Type mistmatch"
+        break;
+    }
+    return env.assignVar(varname, nodeValue)
 }

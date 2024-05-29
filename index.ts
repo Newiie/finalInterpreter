@@ -18,7 +18,7 @@ fs.readFile(`./test.txt`, "utf8", (err, data) => {
     const tokenized = tokenize(data)
     const eofCount = tokenized.filter(token => token.type === TokenType.EOF).length;
     const beginCount = tokenized.filter(token => token.type === TokenType.BEGIN).length;
-    console.log("EOF ", eofCount, "BEGIN ", beginCount)
+    // console.log("EOF ", eofCount, "BEGIN ", beginCount)
     
     if (eofCount != 1 || beginCount != 1) {
         console.error("All codes must be placed inside BEGIN CODE and END CODE, and there should be exactly one BEGIN and one END!");
