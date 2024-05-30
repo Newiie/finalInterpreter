@@ -217,7 +217,10 @@ export function eval_assignment(node: AssignmentExpr, env: Environment): Runtime
 
     // console.log("CHECk 3")
     if ((node.value.kind == "Identifier") && (env.lookupVar((node.value as Identifier).symbol).type === env.lookupVar((node.assignee as Identifier).symbol).type)) {
-    } else if (((node.assignee as Identifier).dataType != node.value.kind ) && node.value.kind != "AssignmentExpr" && node.value.kind != "BinaryExpr") throw `Data Type mismatch ${(node.assignee as Identifier).dataType} not equal to ${node.value.kind}`
+    } else if (node.assignee.dataType == "BooleanLiteral" && node.value.kind == "StringLiteral") {
+    }else if (((node.assignee as Identifier).dataType != node.value.kind ) && node.value.kind != "AssignmentExpr" && node.value.kind != "BinaryExpr"
+  
+    ) throw `Data Type mismatch ${(node.assignee as Identifier).dataType} not equal to ${node.value.kind}`
 
     const varname = (node.assignee as Identifier).symbol
     const nodeValue = evaluate(node.value, env)
