@@ -183,7 +183,12 @@ export function tokenize(srouceCode: string): any[] {
 
         // Handle potential unary operators
         if (src[0] === "-" || src[0] === "+") {
-          num += src.shift(); // Add the unary operator to the number
+          if (tokens[tokens.length - 1].type == TokenType.Identifier) {
+            tokens.push(token(src.shift(), TokenType.BinaryOperator)); // If previous token is an identifier, - or + is a binary operator
+          } else {
+            num += src.shift(); // Else, it is a unary operator
+          }
+
         }
 
         while (src.length > 0 && isint(src[0])) {
@@ -216,7 +221,6 @@ export function tokenize(srouceCode: string): any[] {
         while (src.length > 0) {
           let ident = "";
           while (src.length > 0 && (isalpha(src[0]) || src[0] == "_") ) {
-
             if (src[0] == "<" || src[0] == ">" || src[0] == "=" || src[0] == "!") {
               break;
             }
@@ -256,16 +260,12 @@ export function tokenize(srouceCode: string): any[] {
             tokens.push(token(ident, reserved));
             // console.log("WENT", src[0]);
           } else  {
+            console.log("hat?", src[0]);
             // Unrecognized name must mean user defined symbol.
             if (ident == "") break;
             while (
               src.length > 0 &&
-              src[0] != "=" &&
-              src[0] != "\n" &&
-              src[0] != "\r" &&
-              src[0] != " " &&
-              src[0] != "," &&
-              src[0] != ")"
+              (isalpha(src[0]) || isint(src[0]) || src[0] == '_')
             ) {
               ident += src.shift();
             }

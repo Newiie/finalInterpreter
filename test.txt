@@ -1,5 +1,7 @@
 BEGIN CODE
-	INT x = 5
-	x = 22.2 / 2
-    DISPLAY: x
+	INT x = -1
+	BOOL a = x<0
+	BOOL b = x<0
+	INT c = x+1
+	DISPLAY: "DISPLAY! " & a & b & c
 END CODE
