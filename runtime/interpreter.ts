@@ -93,8 +93,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_identifier(astNode as Identifier, env);
     case "AssignmentExpr":
       return eval_assignment(astNode as AssignmentExpr, env);
-      case "UnaryExpr":
-        return eval_unary_expr(astNode as UnaryExpr, env);
+    case "UnaryExpr":
+      return eval_unary_expr(astNode as UnaryExpr, env);
     case "BinaryExpr":
       // console.log("CHECK 1")
       return eval_binary_expr(astNode as BinaryExpr, env);
@@ -123,29 +123,25 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
 
 function eval_display(Node: Display, env: Environment): RuntimeVal {
   let outputString = "";
-  let i = 0
-  let length = Node.value.length
+  let i = 0;
+  let length = Node.value.length;
   for (i = 0; i < length; i++) {
     if (Node.value[i].kind === "BinaryExpr") {
       outputString += eval_binary_expr(Node.value[i] as BinaryExpr, env).value;
-    }
-    else if (Node.value[i].kind === "Identifier") {
+    } else if (Node.value[i].kind === "Identifier") {
       const newStmt = Node.value[i] as Identifier;
       const vara = env.lookupVar(newStmt.symbol) as NumberVal;
       const value = vara.value;
       outputString += value !== undefined ? value : "undefined";
-    }
-    else if (Node.value[i].kind === "StringLiteral") {
+    } else if (Node.value[i].kind === "StringLiteral") {
       const newStmt = Node.value[i] as StringLiteral;
       outputString += newStmt.value;
-    } 
-    else if (Node.value[i].kind === "EscapeLiteral") {
+    } else if (Node.value[i].kind === "EscapeLiteral") {
       const newStmt = Node.value[i] as EscapeLiteral;
       outputString += newStmt.value;
-    }
-    else if (Node.value[i].kind === "NewLine") {
+    } else if (Node.value[i].kind === "NewLine") {
       outputString += "\n";
-    } 
+    }
     // else {
     //   // Handle other kinds of statements if needed
     // }
@@ -165,7 +161,6 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
   if (input && input.length === node.variables.length) {
     // console.log("EVAL SCAN IF");
     node.variables.forEach((variable, index) => {
-
       let value: RuntimeVal;
       switch (variable.dataType) {
         case "IntegerLiteral":
@@ -185,37 +180,46 @@ function eval_scan(node: Scan, env: Environment): RuntimeVal {
           break;
         case "DEFINED":
           // console.log("LOOK UP ", env.lookupVar((variable as Identifier).symbol))
-          switch(env.lookupVar((variable as Identifier).symbol).type) {
+          switch (env.lookupVar((variable as Identifier).symbol).type) {
             case "char":
+              if(input[index].length > 1) {
+                throw "Invalid input. Datatype CHAR can only hold one character";
+              }
               value = { value: input[index], type: "char" } as CharVal;
               break;
             case "number":
+              if (parseInt(input[index]) != parseFloat(input[index])) {
+                throw "Invalid input. Input data does not match variable datatype";
+              }
               value = {
                 value: parseInt(input[index]),
                 type: "number",
               } as NumberVal;
               break;
             case "float":
+              if (isNaN(parseFloat(input[index]))) {
+                throw "Invalid input. Input data does not match variable datatype";
+              }
               value = {
                 value: parseFloat(input[index]),
                 type: "float",
               } as FloatVal;
-              case "boolean":
-                let temp;
-                // console.log(input[index]);
-                if (input[index] == "\"FALSE\"") {
-                  temp = false;
-                } else if (input[index] == "\"TRUE\"") {
-                  temp = true;
-                } else {
-                  throw "Input data does not match variable datatype";
-                }
+              break;
+            case "boolean":
+              let temp;
+              if (input[index] == '"FALSE"') {
+                temp = false;
+              } else if (input[index] == '"TRUE"') {
+                temp = true;
+              } else {
+                throw "Invalid input. Input data does not match variable datatype";
+              }
 
-                value = {
-                  value: temp,
-                  type: "boolean",
-                } as BooleanVal;
-                break;
+              value = {
+                value: temp,
+                type: "boolean",
+              } as BooleanVal;
+              break;
           }
           break;
         default:

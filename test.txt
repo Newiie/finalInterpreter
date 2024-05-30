@@ -1,7 +1,18 @@
 BEGIN CODE
-	INT x = -1
-	BOOL a = x<0
-	BOOL b = x<0
-	INT c = x+1
-	DISPLAY: "DISPLAY! " & a & b & c
+INT i, result=1, n
+
+# Prompt for input
+SCAN: n
+
+# Factorial calculation
+i = n
+DISPLAY: "i: " & i & " " & "n: " & n & $
+WHILE (i > 1)
+BEGIN WHILE
+    result = result * i
+	i = i-1
+END WHILE	
+
+# Display result
+DISPLAY: "Factorial of " & n & " is: " & result
 END CODE

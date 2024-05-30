@@ -260,7 +260,6 @@ export function tokenize(srouceCode: string): any[] {
             tokens.push(token(ident, reserved));
             // console.log("WENT", src[0]);
           } else  {
-            console.log("hat?", src[0]);
             // Unrecognized name must mean user defined symbol.
             if (ident == "") break;
             while (
